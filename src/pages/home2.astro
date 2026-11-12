@@ -1,0 +1,613 @@
+---
+import { ArrowRight, Check } from "lucide-react";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Hero from "../components/Hero.tsx";
+import SectionHeader from "../components/SectionHeader.tsx";
+import ProductCategories from "../components/ProductCategories.tsx";
+import FactoryShowcase from "../components/FactoryShowcase.tsx";
+import ProcessSteps from "../components/ProcessSteps.tsx";
+import CaseStudies from "../components/CaseStudies.tsx";
+import Certifications from "../components/Certifications.tsx";
+import Testimonials from "../components/Testimonials.tsx";
+import FaqAccordion from "../components/FaqAccordion.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import Footer from "../components/Footer.tsx";
+import { site } from "../data/site";
+import { certifications } from "../data/certifications";
+import {
+  home2Hero,
+  home2Capabilities,
+  home2Scale,
+  home2Brands,
+  home2BrandLogos,
+  home2FactoryChips,
+  home2Definition,
+  home2Categories,
+  home2Customization,
+  home2CustomizationRows,
+  home2Why,
+  home2FactoryCta,
+  home2QualityCta,
+  home2InspectionImages,
+  home2Process,
+  home2Video,
+  home2Cases,
+  home2Testimonials,
+  home2FaqTitle,
+  home2Faq,
+  home2FaqCta,
+  home2Cta,
+} from "../data/home2";
+
+/**
+ * Decluttered home page preview (noindex). The current home page
+ * (`index.astro` + `home.ts`) stays untouched until the owner compares the
+ * two and picks one — then the chosen copy is merged into a single source
+ * and this page or the old one is deleted.
+ *
+ * Funnel, nine blocks:
+ * hero → brands → who we are + four capabilities + what you get free →
+ * categories → three customization rows → three "why" pillars (quality links
+ * to /quality/) → process + factory tour → proof (cases + feedback) →
+ * six-question FAQ → final CTA.
+ *
+ * Copy rule for this page: complete sentences in plain English. No dash
+ * fragments, no noun piles, no clipped slogans in body text. Section headings
+ * stay short because they are read at a glance. Tone follows the group's
+ * Chinese site: name the buyer's situation, say what we take over, name the
+ * chain (requirement → design → sampling → production), close on the result.
+ */
+
+/* Same `**highlight**` convention as <SectionHeader />, for the inline h2 */
+const definitionTitleSegments = home2Definition.title.split(/\*\*(.+?)\*\*/g);
+
+const organizationId = `${site.url}/#organization`;
+const websiteId = `${site.url}/#website`;
+
+const organizationSchema = {
+  "@type": "Organization",
+  "@id": organizationId,
+  name: site.name,
+  legalName: site.legalName,
+  url: site.url,
+  logo: new URL(site.logo.src, site.url).href,
+  description: site.seo.defaultDescription,
+  slogan:
+    "Custom acrylic and PVC display stands, designed and built in our own factory",
+  foundingDate: "2013",
+  numberOfEmployees: { "@type": "QuantitativeValue", value: 150 },
+  email: site.contact.email,
+  telephone: site.contact.phone,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: site.contact.address,
+    addressLocality: "Dongguan",
+    addressRegion: "Guangdong",
+    postalCode: "523287",
+    addressCountry: "CN",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    name: site.persona.name,
+    contactType: "sales",
+    email: site.contact.email,
+    telephone: site.contact.phone,
+    availableLanguage: ["English", "Chinese"],
+  },
+  areaServed: ["United States", "Europe", "Australia", "Middle East"],
+  hasCertification: certifications.map((item) => ({
+    "@type": "Certification",
+    name: item.name,
+  })),
+  sameAs: site.social.map((account) => account.href),
+};
+
+const websiteSchema = {
+  "@type": "WebSite",
+  "@id": websiteId,
+  url: site.url,
+  name: site.name,
+  inLanguage: "en",
+  publisher: { "@id": organizationId },
+};
+
+const webPageSchema = {
+  "@type": "WebPage",
+  "@id": `${site.url}/home2/#webpage`,
+  url: new URL("/home2/", site.url).href,
+  name: "Home Preview",
+  description: site.seo.defaultDescription,
+  isPartOf: { "@id": websiteId },
+  about: { "@id": organizationId },
+  inLanguage: "en",
+};
+
+const videoSchema = {
+  "@type": "VideoObject",
+  "@id": `${site.url}/home2/#factory-tour`,
+  name: home2Video.youtubeTitle,
+  description: home2Video.subtitle,
+  thumbnailUrl: [
+    `https://i.ytimg.com/vi/${home2Video.youtubeId}/maxresdefault.jpg`,
+  ],
+  embedUrl: `https://www.youtube-nocookie.com/embed/${home2Video.youtubeId}`,
+  // [VERIFY] HP-13 upload date — confirm the publish date on YouTube
+  uploadDate: "2025-06-01",
+  publisher: { "@id": organizationId },
+};
+
+/** Answers are the exact strings rendered by <FaqAccordion /> */
+const faqSchema = {
+  "@type": "FAQPage",
+  "@id": `${site.url}/home2/#faq`,
+  mainEntity: home2Faq.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    organizationSchema,
+    websiteSchema,
+    webPageSchema,
+    videoSchema,
+    faqSchema,
+  ],
+};
+---
+
+<BaseLayout title="Home Preview" description={site.seo.defaultDescription} noindex>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <Header client:load />
+
+  <main class="flex-grow">
+    <!-- 01 — Hero: three slides, one CTA each. Slide 1 is the only one in the
+         static HTML, so it carries the main keyword and the strongest promise. -->
+    <Hero
+      client:visible
+      slides={home2Hero.slides}
+      ctaNote={home2Hero.ctaNote}
+    />
+
+    <!-- 02 — Brand footprint: 24 customer logos, pure-CSS marquee.
+         The duplicated group is aria-hidden so screen readers read the
+         list once. -->
+    <section class="section bg-gray-50" id="brands" aria-label="Brands we serve">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={home2Brands.kicker}
+          title={home2Brands.title}
+          subtitle={home2Brands.lead}
+          align="center"
+        />
+      </div>
+
+      <div class="brand-wall" data-animate>
+        <div class="brand-track">
+          {
+            [false, true].map((hidden) => (
+              <div class="brand-group" aria-hidden={hidden || undefined}>
+                {home2BrandLogos.map((brand) => (
+                  <span class="flex shrink-0 items-center justify-center border border-gray-200 bg-white px-8 py-4">
+                    <img
+                      src={brand.src}
+                      alt={hidden ? "" : brand.name}
+                      width="320"
+                      height="96"
+                      loading="lazy"
+                      decoding="async"
+                      class="h-12 w-auto grayscale opacity-80 transition duration-300 hover:opacity-100 hover:grayscale-0"
+                    />
+                  </span>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 — Who we are (text + sample-room photo), four capabilities, then
+         the free work that comes before an order -->
+    <section class="section" aria-labelledby="definition">
+      <div class="container-page">
+        <div class="grid items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+          <div>
+            <h2
+              id="definition"
+              class="font-display text-3xl font-bold leading-tight text-gray-900 md:text-4xl"
+            >
+              {
+                definitionTitleSegments.map((segment, index) =>
+                  index % 2 === 1 ? (
+                    <span class="text-primary-600">{segment}</span>
+                  ) : (
+                    segment
+                  )
+                )
+              }
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-gray-600">
+              {home2Definition.paragraph}
+            </p>
+            <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <a
+                href={home2Definition.links[0].href}
+                class="inline-flex items-center gap-1 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
+              >
+                {home2Definition.links[0].label}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </a>
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded-card bg-gray-100" data-animate>
+            <img
+              src={home2Definition.image.src}
+              alt={home2Definition.image.alt}
+              loading="lazy"
+              decoding="async"
+              class="aspect-[4/3] w-full object-cover"
+            />
+          </div>
+        </div>
+
+        <!-- Four capabilities sit inside the intro block: who we are, then
+             what we do, read as one piece -->
+        <ul
+          class="mt-12 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4"
+          aria-label="Core capabilities"
+        >
+          {
+            home2Capabilities.map((item, index) => (
+              <li class="flex items-start gap-4" data-animate data-delay={index * 60}>
+                {item.paths ? (
+                  <svg
+                    width="34"
+                    height="34"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    class="mt-0.5 shrink-0 text-primary-600"
+                  >
+                    {item.paths.map((d) => (
+                      <path d={d} />
+                    ))}
+                  </svg>
+                ) : (
+                  <img
+                    src={item.iconSrc}
+                    alt=""
+                    width="34"
+                    height="34"
+                    loading="lazy"
+                    decoding="async"
+                    class="mt-0.5 shrink-0"
+                  />
+                )}
+                <div>
+                  <b class="block text-base font-bold text-gray-900">
+                    {item.title}
+                  </b>
+                  <span class="mt-1 block text-sm leading-relaxed text-gray-500">
+                    {item.sub}
+                  </span>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+
+        <!-- Factory scale, once: the only place the plant figures appear -->
+        <p class="mt-8 border-t border-gray-200 pt-6 text-sm text-gray-500">
+          {home2Scale}
+        </p>
+
+        <!-- Free work before you order: five full sentences, two columns -->
+        <div class="mt-14 border border-gray-200 bg-white p-6 md:p-8" data-animate>
+          <p class="eyebrow">{home2Definition.offerEyebrow}</p>
+          <h3 class="mt-3 font-display text-2xl leading-tight font-bold text-gray-900">
+            {home2Definition.offerTitle}
+          </h3>
+          <p class="mt-3 max-w-3xl leading-relaxed text-gray-600">
+            {home2Definition.offerLead}
+          </p>
+          <ul class="mt-6 grid gap-x-10 gap-y-4 sm:grid-cols-2">
+            {
+              home2Definition.offerItems.map((item) => (
+                <li class="flex gap-3 text-base leading-relaxed text-gray-700">
+                  <Check
+                    className="mt-1 h-4 w-4 shrink-0 text-primary-600"
+                    aria-hidden="true"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 — Categories: the visual focus of the page -->
+    <ProductCategories
+      title={home2Categories.title}
+      subtitle={home2Categories.subtitle}
+      action={home2Categories.cta}
+    />
+
+    <!-- 05 — Customization: three rows, alternating sides -->
+    <section class="section bg-gray-50" id="customization">
+      <div class="container-page">
+        <SectionHeader
+          title={home2Customization.title}
+          subtitle={home2Customization.subtitle}
+          align="center"
+        />
+
+        <div class="mt-14 space-y-16 lg:space-y-24">
+          {
+            home2CustomizationRows.map((row, index) => (
+              <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+                <div
+                  class={`overflow-hidden rounded-card bg-gray-100 ${
+                    index % 2 === 0 ? "lg:order-2" : ""
+                  }`}
+                  data-animate
+                >
+                  <img
+                    src={row.image.src}
+                    alt={row.image.alt}
+                    loading="lazy"
+                    class="aspect-[4/3] w-full object-cover"
+                  />
+                </div>
+
+                <div class={index % 2 === 0 ? "lg:order-1" : ""}>
+                  <h3 class="font-display text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
+                    {row.title}
+                  </h3>
+                  <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                    {row.body}
+                  </p>
+                  <ul class="mt-6 flex flex-wrap gap-2">
+                    {row.points.map((point) => (
+                      <li class="chip">{point}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="mt-14 flex justify-center">
+          <a href={home2Customization.cta.href} class="btn-primary">
+            {home2Customization.cta.label}
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 — Why: three light rows; quality is one sentence + link -->
+    <section class="section" id="why">
+      <div class="container-page">
+        <SectionHeader
+          title={home2Why.title}
+          subtitle={home2Why.subtitle}
+          align="center"
+        />
+
+        <div class="mt-14 space-y-16 lg:space-y-24">
+          <!-- Row 1 — the plant -->
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div
+              id="factory"
+              class="overflow-hidden rounded-card bg-gray-100"
+              data-animate
+            >
+              <FactoryShowcase client:visible />
+            </div>
+
+            <div>
+              <h3 class="font-display text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
+                {home2Why.pillars.manufacturing.label}
+              </h3>
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                {home2Why.pillars.manufacturing.body}
+              </p>
+              <ul class="mt-6 flex flex-wrap gap-2">
+                {home2FactoryChips.map((chip) => (
+                  <li class="chip">{chip}</li>
+                ))}
+              </ul>
+              <a href={home2FactoryCta.href} class="btn-outline mt-7">
+                {home2FactoryCta.label}
+              </a>
+            </div>
+          </div>
+
+          <!-- Row 2 — quality: one sentence + link to the full protocol -->
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <h3 class="font-display text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
+                {home2Why.pillars.quality.label}
+              </h3>
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                {home2Why.pillars.quality.body}
+              </p>
+              <a href={home2QualityCta.href} class="btn-outline mt-7">
+                {home2QualityCta.label}
+              </a>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3" data-animate>
+              {
+                home2InspectionImages.map((image) => (
+                  <div class="overflow-hidden rounded-card bg-gray-100">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      loading="lazy"
+                      class="aspect-[3/4] w-full object-cover"
+                    />
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+
+          <!-- Row 3 — certifications: marks only, no extra CTA -->
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div class="lg:order-2">
+              <h3 class="font-display text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
+                {home2Why.pillars.certifications.label}
+              </h3>
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                {home2Why.pillars.certifications.body}
+              </p>
+            </div>
+
+            <div class="lg:order-1" data-animate>
+              <Certifications variant="strip" showHeading={false} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 — Process rail, then the factory tour in the same block -->
+    <section class="section bg-gray-50" id="process">
+      <ProcessSteps
+        client:visible
+        title={home2Process.title}
+        subtitle={home2Process.subtitle}
+        action={home2Process.cta}
+      />
+
+      <div class="container-page mt-16 lg:mt-24">
+        <div class="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
+          <div
+            class="relative aspect-video overflow-hidden rounded-xs bg-gray-100"
+            data-animate
+          >
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${home2Video.youtubeId}?rel=0`}
+              title={home2Video.youtubeTitle}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              class="absolute inset-0 h-full w-full"
+            ></iframe>
+          </div>
+
+          <div data-animate data-delay="60">
+            <h3 class="font-display text-2xl font-bold text-gray-900">
+              {home2Video.title}
+            </h3>
+            <p class="mt-3 leading-relaxed text-gray-600">
+              {home2Video.subtitle}
+            </p>
+            <a
+              href={home2Video.watchUrl}
+              class="btn-outline mt-6"
+              target="_blank"
+              rel="noopener"
+            >
+              Watch on YouTube
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 08 — Proof: custom programs we manufactured, then buyer feedback -->
+    <CaseStudies
+      title={home2Cases.title}
+      subtitle={home2Cases.subtitle}
+      showResults
+      action={home2Cases.cta}
+    />
+
+    <Testimonials
+      client:visible
+      title={home2Testimonials.title}
+    />
+
+    <!-- 09 — FAQ: six questions, mirrored in the FAQPage schema -->
+    <FaqAccordion
+      items={home2Faq}
+      title={home2FaqTitle}
+      action={home2FaqCta}
+    />
+
+    <!-- 10 — Final CTA: the page's one strong close -->
+    <FinalCTA
+      title={home2Cta.title}
+      description={home2Cta.description}
+      bullets={home2Cta.bullets}
+      primary={home2Cta.primary}
+      secondary={home2Cta.secondary}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  /* Brand-wall marquee: two identical groups side by side; translating the
+     track by -50% loops the row seamlessly. Scoped to this page — promote
+     to global.css if the band graduates to the real home page. */
+  .brand-wall {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .brand-track {
+    display: flex;
+    width: max-content;
+    animation: brand-scroll 60s linear infinite;
+  }
+
+  .brand-group {
+    display: flex;
+    flex-shrink: 0;
+    gap: 1rem;
+    padding-right: 1rem;
+  }
+
+  .brand-wall:hover .brand-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes brand-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Reduced motion: stop the loop, let the row scroll by hand */
+  @media (prefers-reduced-motion: reduce) {
+    .brand-track {
+      animation: none;
+    }
+
+    .brand-wall {
+      overflow-x: auto;
+    }
+  }
+</style>

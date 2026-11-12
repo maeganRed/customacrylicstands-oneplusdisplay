@@ -1,0 +1,453 @@
+---
+import { ArrowRight } from "lucide-react";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import PageHeader from "../components/PageHeader.tsx";
+import SectionHeader from "../components/SectionHeader.tsx";
+import ManufacturingAdvantages from "../components/ManufacturingAdvantages.tsx";
+import FactoryShowcase from "../components/FactoryShowcase.tsx";
+import Certifications from "../components/Certifications.tsx";
+import Testimonials from "../components/Testimonials.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import { site } from "../data/site";
+import { jackLi } from "../data/jackLi";
+import { homeQuality } from "../data/home";
+import { testimonials } from "../data/testimonials";
+import { aboutFactorySlides } from "../data/about";
+
+/** Three cards on the page; the full set stays on /customer-testimonials/ */
+const featuredTestimonials = testimonials.slice(0, 3);
+
+const pageUrl = new URL("/jack-li/", site.url).href;
+
+const personSchema = {
+  "@type": "Person",
+  "@id": `${pageUrl}#jack-li`,
+  name: jackLi.hero.name,
+  jobTitle: site.persona.title,
+  email: site.persona.email,
+  image: new URL(jackLi.hero.image, site.url).href,
+  url: pageUrl,
+  description: jackLi.seo.description,
+  knowsAbout: jackLi.schema.knowsAbout,
+  worksFor: {
+    "@type": "Organization",
+    name: site.name,
+    legalName: site.legalName,
+    url: site.url,
+  },
+  mainEntityOfPage: pageUrl,
+};
+
+const breadcrumbSchema = {
+  "@type": "BreadcrumbList",
+  "@id": `${pageUrl}#breadcrumb`,
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: new URL("/", site.url).href,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "About Us",
+      item: new URL("/about-us/", site.url).href,
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: jackLi.hero.name,
+      item: pageUrl,
+    },
+  ],
+};
+
+/** Answers are the exact strings rendered in the FAQ block below */
+const faqSchema = {
+  "@type": "FAQPage",
+  "@id": `${pageUrl}#faq`,
+  mainEntity: jackLi.faqItems.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [personSchema, breadcrumbSchema, faqSchema],
+};
+---
+
+<BaseLayout title={jackLi.seo.title} description={jackLi.seo.description}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <Header client:load />
+
+  <main class="flex-grow">
+    <PageHeader
+      variant="breadcrumb"
+      breadcrumbs={[
+        { label: "About Us", href: "/about-us/" },
+        { label: jackLi.hero.name },
+      ]}
+    />
+
+    {/* 01 — Person hero: portrait, h1, positioning, contact routes */}
+    <section class="pb-16 pt-6 md:pb-20">
+      <div class="container-page grid items-start gap-10 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-5">
+          <figure>
+            <div class="aspect-square overflow-hidden rounded-xs bg-gray-100">
+              <img
+                src={jackLi.hero.image}
+                alt={jackLi.hero.imageAlt}
+                class="h-full w-full object-cover"
+              />
+            </div>
+            <figcaption class="mt-3 text-sm text-gray-500">
+              {jackLi.hero.name} · {site.persona.title}
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="lg:col-span-7">
+          <p class="eyebrow mb-4">{jackLi.hero.eyebrow}</p>
+          <h1 class="text-4xl font-bold text-gray-900 md:text-5xl">
+            {jackLi.hero.name}
+          </h1>
+          <span class="mt-4 block h-1 w-12 bg-primary-600" aria-hidden="true" />
+
+          <p class="mt-6 text-lg leading-relaxed text-gray-700">
+            {jackLi.hero.intro}
+          </p>
+
+          <div class="mt-4 space-y-4 text-gray-600">
+            {jackLi.hero.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+          </div>
+
+          <div class="mt-8 flex flex-wrap gap-3">
+            {
+              jackLi.hero.actions.map((action, index) => (
+                <a
+                  href={action.href}
+                  class={index === 0 ? "btn-primary" : "btn-outline"}
+                >
+                  {action.label}
+                </a>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* Facts band — every number already appears on About Us or the home page */}
+    <section class="bg-navy-900 py-12 text-white">
+      <div class="container-page">
+        <dl class="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
+          {
+            jackLi.hero.facts.map((fact, index) => (
+              <div
+                class="border-l border-white/20 pl-5"
+                data-animate
+                data-delay={(index % 5) * 60}
+              >
+                <dt class="text-sm text-primary-200">{fact.label}</dt>
+                <dd class="mt-1 font-display text-2xl font-bold md:text-3xl">
+                  {fact.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    {/* 02 — Scope */}
+    <section class="section bg-gray-50">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={jackLi.owns.eyebrow}
+          title={jackLi.owns.title}
+          subtitle={jackLi.owns.subtitle}
+        />
+        <ManufacturingAdvantages
+          items={jackLi.ownsItems}
+          variant="grid"
+          columns={4}
+          showHeader={false}
+        />
+      </div>
+    </section>
+
+    {/* 03 — The protocol, read from homeQuality so it cannot drift */}
+    <section class="section bg-white">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={jackLi.quality.eyebrow}
+          title={jackLi.quality.title}
+          subtitle={jackLi.quality.subtitle}
+        />
+
+        <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+          <div class="lg:col-span-5">
+            <h3 class="mb-6 text-sm font-bold uppercase tracking-wider text-gray-500">
+              {jackLi.quality.gatesLabel}
+            </h3>
+            <ol class="border-l border-gray-200">
+              {
+                homeQuality.gates.map((gate) => (
+                  <li class="relative pb-8 pl-6 last:pb-0" data-animate>
+                    <span
+                      class="absolute -left-[5px] top-2 h-2.5 w-2.5 rounded-full bg-primary-600 ring-4 ring-white"
+                      aria-hidden="true"
+                    />
+                    <p class="text-xs font-bold uppercase tracking-wider text-primary-600">
+                      {gate.stage}
+                    </p>
+                    <h4 class="mt-1 text-lg font-semibold text-gray-900">
+                      {gate.title}
+                    </h4>
+                    <p class="mt-2 text-gray-600">{gate.body}</p>
+                  </li>
+                ))
+              }
+            </ol>
+          </div>
+
+          <div class="lg:col-span-7">
+            <h3 class="mb-6 text-sm font-bold uppercase tracking-wider text-gray-500">
+              {jackLi.quality.testsLabel}
+            </h3>
+            <ul class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+              {
+                homeQuality.tests.map((test, index) => (
+                  <li
+                    class="border-t border-gray-200 pt-4"
+                    data-animate
+                    data-delay={(index % 2) * 60}
+                  >
+                    <p class="flex items-baseline gap-2 font-semibold text-gray-900">
+                      <span
+                        class="font-display text-xs font-bold text-primary-600"
+                        aria-hidden="true"
+                      >
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {test.name}
+                    </p>
+                    <p class="mt-1 text-sm text-gray-600">{test.method}</p>
+                  </li>
+                ))
+              }
+            </ul>
+
+            <p class="mt-8 border-t border-gray-200 pt-6 text-sm font-medium text-gray-700">
+              {homeQuality.compliance}
+            </p>
+            <p class="mt-3 text-sm leading-relaxed text-gray-500">
+              {homeQuality.reportNote}
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* 04 — Factory floor proof */}
+    <section class="section bg-gray-50">
+      <div class="container-page grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-5">
+          <p class="eyebrow mb-4">{jackLi.floor.eyebrow}</p>
+          <h2 class="section-title">{jackLi.floor.title}</h2>
+          <span class="mt-4 block h-1 w-10 bg-primary-600" aria-hidden="true" />
+          <p class="mt-5 leading-relaxed text-gray-600">{jackLi.floor.body}</p>
+          <a
+            href={jackLi.floor.link.href}
+            class="mt-6 inline-flex items-center gap-1 font-medium text-primary-600 hover:underline"
+          >
+            {jackLi.floor.link.label}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </div>
+
+        <div class="lg:col-span-7">
+          <FactoryShowcase
+            client:visible
+            slides={aboutFactorySlides}
+            label="Factory floor slideshow"
+          />
+          <p class="mt-4 text-sm leading-relaxed text-gray-500">
+            {jackLi.floor.caption}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {/* 05 — Career timeline */}
+    <section class="section bg-white">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={jackLi.timeline.eyebrow}
+          title={jackLi.timeline.title}
+          subtitle={jackLi.timeline.subtitle}
+        />
+
+        <ol class="mx-auto max-w-4xl border-l border-gray-200">
+          {
+            jackLi.timelineItems.map((entry) => (
+              <li
+                class="relative grid gap-2 pb-10 pl-6 last:pb-0 md:grid-cols-[7rem_1fr] md:gap-8 md:pl-8"
+                data-animate
+              >
+                <span
+                  class="absolute -left-[5px] top-2 h-2.5 w-2.5 rounded-full bg-primary-600 ring-4 ring-white"
+                  aria-hidden="true"
+                />
+                <div class="text-sm font-bold tracking-wider text-primary-600">
+                  {entry.year}
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">
+                    {entry.title}
+                  </h3>
+                  <p class="mt-2 text-gray-600">{entry.description}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    {/* 06 — Statement in his voice */}
+    <section class="relative overflow-hidden bg-navy-900 py-16 text-white">
+      <div class="texture-grid" aria-hidden="true" />
+      <div class="container-page relative z-10">
+        <div class="mx-auto max-w-3xl">
+          <p class="text-xs font-bold uppercase tracking-wider text-primary-200">
+            {jackLi.quote.eyebrow}
+          </p>
+          <h2 class="mt-3 text-2xl font-bold md:text-3xl">
+            {jackLi.quote.title}
+          </h2>
+          <blockquote class="mt-8 border-l-2 border-primary-500 pl-6">
+            <p class="font-display text-xl leading-relaxed text-white md:text-2xl">
+              &ldquo;{jackLi.quote.text}&rdquo;
+            </p>
+            <footer class="mt-5 text-sm text-primary-200">
+              — {jackLi.quote.attribution}
+            </footer>
+          </blockquote>
+        </div>
+      </div>
+    </section>
+
+    {/* 07 — Verifiable links + certification strip */}
+    <section class="section bg-white">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={jackLi.verify.eyebrow}
+          title={jackLi.verify.title}
+          subtitle={jackLi.verify.subtitle}
+        />
+
+        <div class="grid gap-6 lg:grid-cols-3">
+          {
+            jackLi.verifyLinks.map((link, index) => (
+              <a
+                href={link.href}
+                class="group flex flex-col border border-gray-200 bg-white p-6 transition duration-200 hover:-translate-y-0.5 hover:border-primary-300 hover:shadow-md"
+                data-animate
+                data-delay={index * 60}
+              >
+                <span
+                  class="font-display text-xs font-bold text-primary-600"
+                  aria-hidden="true"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3 class="mt-2 text-lg font-semibold text-gray-900">
+                  {link.title}
+                </h3>
+                <p class="mt-3 flex-1 text-sm leading-relaxed text-gray-600">
+                  {link.description}
+                </p>
+                <span class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-primary-600">
+                  {link.label}
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none"
+                    aria-hidden="true"
+                  />
+                </span>
+              </a>
+            ))
+          }
+        </div>
+
+        <div class="mt-14">
+          <Certifications
+            variant="strip"
+            eyebrow={jackLi.certifications.eyebrow}
+            title={jackLi.certifications.title}
+            subtitle={jackLi.certifications.subtitle}
+          />
+        </div>
+      </div>
+    </section>
+
+    {/* 08 — Three cards from the published feedback set */}
+    <Testimonials
+      client:visible
+      items={featuredTestimonials}
+      eyebrow={jackLi.testimonials.eyebrow}
+      title={jackLi.testimonials.title}
+      subtitle={jackLi.testimonials.subtitle}
+    />
+
+    <div class="bg-gray-50 pb-14">
+      <div class="container-page text-center">
+        <a href={jackLi.testimonials.link.href} class="btn-outline">
+          {jackLi.testimonials.link.label}
+        </a>
+      </div>
+    </div>
+
+    {/* 09 — About Jack FAQ */}
+    <section class="section bg-white">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={jackLi.faq.eyebrow}
+          title={jackLi.faq.title}
+          align="left"
+        />
+
+        <dl class="mx-auto max-w-3xl divide-y divide-gray-200 border-t border-gray-200">
+          {
+            jackLi.faqItems.map((item) => (
+              <div class="py-6" data-animate>
+                <dt class="text-lg font-semibold text-gray-900">
+                  {item.question}
+                </dt>
+                <dd class="mt-2 leading-relaxed text-gray-600">{item.answer}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <FinalCTA
+      title={jackLi.cta.title}
+      description={jackLi.cta.description}
+      footnote={jackLi.cta.footnote}
+      primary={jackLi.cta.primary}
+      secondary={jackLi.cta.secondary}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

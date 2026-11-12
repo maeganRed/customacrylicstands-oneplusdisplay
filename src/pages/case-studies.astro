@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import CaseIndex from "../components/CaseIndex.astro";
+import { CASE_PAGE_SIZE, caseStudies } from "../data/cases";
+
+const totalPages = Math.max(1, Math.ceil(caseStudies.length / CASE_PAGE_SIZE));
+const items = caseStudies.slice(0, CASE_PAGE_SIZE);
+---
+
+<BaseLayout
+  title="Case Studies"
+  description="Acrylic and PVC foam board display programmes built for brands, retail chains and distributors in the US, Europe, Australia and the Middle East — brief, structure, lead time and packing for each one."
+>
+  <Header client:load />
+
+  <CaseIndex
+    items={items}
+    breadcrumbs={[{ label: "Case Studies" }]}
+    currentPage={1}
+    totalPages={totalPages}
+    basePath="/case-studies/"
+    pageBasePath="/case-studies/page"
+  />
+
+  <Footer />
+</BaseLayout>

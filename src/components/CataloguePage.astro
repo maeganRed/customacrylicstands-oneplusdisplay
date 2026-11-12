@@ -1,0 +1,104 @@
+---
+import type { Product } from "../types";
+import type { Crumb } from "./Breadcrumbs";
+import PageHeader from "./PageHeader.tsx";
+import ProductCard from "./ProductCard.tsx";
+import CategorySidebar from "./CategorySidebar.tsx";
+import Pagination from "./Pagination.tsx";
+import FinalCTA from "./FinalCTA.tsx";
+
+/** Cards in the same row appear 60ms apart, but never past three steps */
+const STAGGER = 60;
+const CATALOGUE_COLUMNS = 3;
+
+interface Props {
+  title: string;
+  subtitle: string;
+  breadcrumbs: Crumb[];
+  items: Product[];
+  /** Highlights the current category in the sidebar */
+  activeSlug?: string;
+  emptyMessage?: string;
+  /** Omit the pager props to render a single-page listing */
+  currentPage?: number;
+  totalPages?: number;
+  basePath?: string;
+  pageBasePath?: string;
+}
+
+const {
+  title,
+  subtitle,
+  breadcrumbs,
+  items,
+  activeSlug,
+  emptyMessage = "No stand models are linked to this category yet. Tell us what you need and we will develop one around your product.",
+  currentPage,
+  totalPages,
+  basePath,
+  pageBasePath,
+} = Astro.props;
+
+const showPager =
+  currentPage !== undefined && totalPages !== undefined && basePath !== undefined;
+const pagerProps = {
+  currentPage: currentPage ?? 1,
+  totalPages: totalPages ?? 1,
+  basePath: basePath ?? "/pop-retail-displays/",
+  pageBasePath: pageBasePath ?? basePath ?? "/pop-retail-displays/",
+};
+---
+
+<main class="flex-grow bg-gray-100">
+  <PageHeader variant="breadcrumb" breadcrumbs={breadcrumbs} />
+
+  <section class="section pt-8 md:pt-10">
+    <div class="container-page">
+      <div class="grid gap-8 lg:grid-cols-[240px_1fr] lg:gap-x-10 lg:gap-y-8">
+        {/* Heading: DOM first so mobile reads title → filters → products */}
+        <div class="lg:col-start-2 lg:row-start-1">
+          <h1 class="text-3xl font-bold text-gray-900 md:text-4xl">{title}</h1>
+          <p class="mt-3 max-w-2xl text-base leading-relaxed text-gray-600">
+            {subtitle}
+          </p>
+        </div>
+
+        {/* Category navigation: sticky beside the heading and the grid */}
+        <div class="lg:col-start-1 lg:row-span-2 lg:row-start-1">
+          <CategorySidebar activeSlug={activeSlug} />
+        </div>
+
+        <div class="lg:col-start-2 lg:row-start-2">
+          {
+            items.length > 0 ? (
+              <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((product, index) => (
+                  <ProductCard
+                    product={product}
+                    variant="catalog"
+                    revealDelay={(index % CATALOGUE_COLUMNS) * STAGGER}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p class="text-gray-600">{emptyMessage}</p>
+            )
+          }
+
+          {
+            showPager && (
+              <Pagination
+                currentPage={pagerProps.currentPage}
+                totalPages={pagerProps.totalPages}
+                basePath={pagerProps.basePath}
+                pageBasePath={pagerProps.pageBasePath}
+              />
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <FinalCTA />
+</main>

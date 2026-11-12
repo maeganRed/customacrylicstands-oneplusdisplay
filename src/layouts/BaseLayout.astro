@@ -1,0 +1,196 @@
+---
+import "../styles/global.css";
+/* Flag + dial-code selector stylesheet (used by every form's phone field,
+   including the site-wide inquiry dialog) */
+import "intl-tel-input/styles";
+import InquiryDialog from "../components/InquiryDialog.tsx";
+import { site } from "../data/site";
+
+interface Props {
+  /** Page-specific part of the <title>; omit on the home page */
+  title?: string;
+  description?: string;
+  /** Social preview image path, defaults to the hero image */
+  image?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = site.seo.defaultDescription,
+  image = site.seo.ogImage,
+  noindex = false,
+} = Astro.props;
+
+const pageTitle = title
+  ? `${title} | ${site.seo.titleSuffix}`
+  : site.seo.defaultTitle;
+/** Ends with a slash whatever form was requested, so canonical matches the sitemap */
+const path = Astro.url.pathname.endsWith("/")
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
+const canonical = new URL(path, site.url).href;
+const ogImage = new URL(image, site.url).href;
+---
+
+<!doctype html>
+<html lang={site.locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content={site.themeColor} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <!-- Enables scroll-reveal before first paint (keeps content visible if JS is off) -->
+    <script is:inline>
+      document.documentElement.classList.add("reveal-ready");
+    </script>
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <slot />
+
+    <!-- Global WhatsApp chat button: one mount for every page -->
+    <a
+      href={site.contact.whatsappHref}
+      target="_blank"
+      rel="noopener"
+      aria-label="Chat with us on WhatsApp"
+      class="fixed right-4 bottom-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-105 sm:right-6 sm:bottom-6 sm:h-14 sm:w-14"
+    >
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="h-6 w-6 sm:h-7 sm:w-7">
+        <path
+          d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+        ></path>
+      </svg>
+    </a>
+
+    <!-- Quote dialog: one mount for every page -->
+    <InquiryDialog client:load />
+
+    <script is:inline>
+      (() => {
+        const items = document.querySelectorAll("[data-animate]");
+        if (!items.length) return;
+
+        if (!("IntersectionObserver" in window)) {
+          items.forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
+
+        /* Fires as soon as an element's edge shows up, so the short reveal
+           starts before the block is fully on screen */
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+              /* Stagger delays are written inline; drop them once they have
+                 played so nothing else on the element is held back */
+              window.setTimeout(() => {
+                entry.target.style.removeProperty("transition-delay");
+              }, 600);
+            });
+          },
+          /* Start the moment any pixel shows, so tall blocks never look stuck */
+          { threshold: 0, rootMargin: "0px 0px -24px 0px" },
+        );
+
+        items.forEach((el) => {
+          const delay = el.getAttribute("data-delay");
+          if (delay) el.style.transitionDelay = `${delay}ms`;
+          observer.observe(el);
+        });
+      })();
+    </script>
+
+    <!-- Press ripple for every .btn-* variant (see .ripple in global.css) -->
+    <script is:inline>
+      (() => {
+        const SELECTOR =
+          ".btn-primary, .btn-outline, .btn-light, .btn-ghost-light, .btn-cta";
+        const reduceMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        );
+        if (reduceMotion.matches) return;
+
+        /* clientX/clientY are viewport coordinates, like a pointer event */
+        const spawnRipple = (button, clientX, clientY) => {
+          const rect = button.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+
+          /* Diameter covers the longest diagonal from any press point */
+          const size = Math.max(rect.width, rect.height) * 2.2;
+          const originX = clientX - rect.left;
+          const originY = clientY - rect.top;
+
+          const ripple = document.createElement("span");
+          ripple.className = "ripple";
+          ripple.style.width = `${size}px`;
+          ripple.style.height = `${size}px`;
+          ripple.style.left = `${originX - size / 2}px`;
+          ripple.style.top = `${originY - size / 2}px`;
+          button.appendChild(ripple);
+
+          const cleanup = () => ripple.remove();
+          ripple.addEventListener("animationend", cleanup, { once: true });
+          /* Fallback: a button removed mid-animation must not leak the span */
+          window.setTimeout(cleanup, 800);
+        };
+
+        /* Press, not release: the ripple starts on pointerdown, in step with
+           the :active sink. One listener covers mouse, touch and pen. */
+        document.addEventListener(
+          "pointerdown",
+          (event) => {
+            /* Primary button only; touch and pen always report 0 */
+            if (event.button !== 0) return;
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            const button = target.closest(SELECTOR);
+            if (!button) return;
+            spawnRipple(button, event.clientX, event.clientY);
+          },
+          { capture: true },
+        );
+
+        /* Keyboard activation and el.click() report detail === 0: ripple from
+           the centre. Pointer clicks (detail >= 1) already rippled on press. */
+        document.addEventListener("click", (event) => {
+          if (event.detail !== 0) return;
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+          const button = target.closest(SELECTOR);
+          if (!button) return;
+          const rect = button.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          spawnRipple(
+            button,
+            rect.left + rect.width / 2,
+            rect.top + rect.height / 2,
+          );
+        });
+      })();
+    </script>
+  </body>
+</html>

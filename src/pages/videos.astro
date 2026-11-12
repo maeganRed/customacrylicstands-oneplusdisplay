@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import PageHeader from "../components/PageHeader.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import { homeVideo, videosPageCta } from "../data/home";
+---
+
+<BaseLayout
+  title="Video"
+  description="Watch the One Plus Display factory tour: acrylic cutting, heat bending, UV flatbed printing and display assembly in our own plant, plus load, drop and transport checks filmed for every batch."
+>
+  <Header client:load />
+
+  <PageHeader
+    title="Factory Video"
+    subtitle="A walk through our own floor — acrylic cutting, bending and UV printing, plus the load, drop and transport checks run on finished batches."
+    breadcrumbs={[
+      { label: "Resources", href: "/news/" },
+      { label: "Video" },
+    ]}
+  />
+
+  <main class="flex-grow">
+    <section class="section">
+      <div class="container-page max-w-3xl">
+        <p class="eyebrow mb-3">Watch the tour</p>
+        <h2 class="section-title mb-6 text-2xl md:text-3xl">
+          We would rather show you the floor than describe it
+        </h2>
+
+        <div
+          class="relative aspect-video mb-8 overflow-hidden rounded-xs bg-gray-100"
+        >
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${homeVideo.youtubeId}?rel=0`}
+            title={homeVideo.youtubeTitle}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+            class="absolute inset-0 h-full w-full"
+          ></iframe>
+        </div>
+
+        <p class="mb-4 leading-relaxed text-gray-700">
+          The tour covers sheet cutting and edge polishing, heat bending, UV
+          flatbed printing and full display assembly, through to finished
+          acrylic and PVC foam board stands on the packing line.
+        </p>
+        <p class="mb-4 leading-relaxed text-gray-700">
+          Every batch also gets load, drop and transport checks filmed before it
+          ships, and that footage goes out with the shipping documents.
+        </p>
+        <p class="mb-8 leading-relaxed text-gray-600">
+          If you want to see a specific material, machine or process before
+          ordering, ask and we will point the camera at it — or arrange a live
+          video call from the plant.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href={homeVideo.watchUrl} class="btn-primary" target="_blank" rel="noopener">
+            Watch on YouTube
+          </a>
+          <a href="/case-studies/" class="btn-outline">See recent programmes</a>
+        </div>
+      </div>
+    </section>
+
+    <FinalCTA
+      title={videosPageCta.title}
+      description={videosPageCta.description}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,45 @@
+---
+import type { CaseStudy } from "../types";
+import type { Crumb } from "./Breadcrumbs";
+import PageHeader from "./PageHeader.tsx";
+import CaseStudies from "./CaseStudies.tsx";
+import FinalCTA from "./FinalCTA.tsx";
+import { casesIndexCta } from "../data/cases";
+
+interface Props {
+  /** Programmes of the current page */
+  items: CaseStudy[];
+  breadcrumbs: Crumb[];
+  currentPage: number;
+  totalPages: number;
+  basePath: string;
+  pageBasePath: string;
+}
+
+const { items, breadcrumbs, currentPage, totalPages, basePath, pageBasePath } =
+  Astro.props;
+---
+
+<main class="flex-grow">
+  <PageHeader
+    title="Case Studies"
+    subtitle="Display programmes for brands, retail chains and distributors — what the brief asked for, how the structure was resolved, and how it was produced and packed."
+    breadcrumbs={breadcrumbs}
+  />
+
+  <CaseStudies
+    showHeader={false}
+    cases={items}
+    currentPage={currentPage}
+    totalPages={totalPages}
+    basePath={basePath}
+    pageBasePath={pageBasePath}
+  />
+
+  <FinalCTA
+    title={casesIndexCta.title}
+    description={casesIndexCta.description}
+    primary={{ label: "Request a Quote", href: "/contact/" }}
+    secondary={{ label: "See Reference Builds", href: "/pop-retail-displays/" }}
+  />
+</main>

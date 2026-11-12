@@ -1,0 +1,202 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.tsx";
+import Footer from "../../components/Footer.tsx";
+import Breadcrumbs from "../../components/Breadcrumbs.tsx";
+import CaseStudies from "../../components/CaseStudies.tsx";
+import FinalCTA from "../../components/FinalCTA.tsx";
+import AuthorCard from "../../components/AuthorCard.astro";
+import { caseStudies, caseDetailCta, relatedCases } from "../../data/cases";
+
+/** Figures in the same row appear 60ms apart */
+const STAGGER = 60;
+
+export function getStaticPaths() {
+  return caseStudies.map((item) => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const related = relatedCases(item.slug);
+const results = item.results ?? [];
+const sections = item.body ?? [];
+const breadcrumbs = [
+  { label: "Home", href: "/" },
+  { label: "Case Studies", href: "/case-studies/" },
+  { label: item.country },
+];
+---
+
+<BaseLayout title={item.title} description={item.description} image={item.image}>
+  <Header client:load />
+
+  <main class="flex-grow">
+    <!-- Breadcrumb strip -->
+    <div class="border-b border-gray-100 bg-white">
+      <div class="container-page py-4">
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
+    </div>
+
+    <article class="container-page py-10 md:py-14">
+      <div class="grid gap-12 lg:grid-cols-[1fr_20rem]">
+        <div class="min-w-0">
+          <div class="flex flex-wrap gap-2">
+            <span class="chip bg-primary-50 text-primary-700">{item.country}</span>
+            <span class="chip">{item.industry}</span>
+            <span class="chip">{item.year}</span>
+          </div>
+
+          <h1 class="mt-5 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+            {item.title}
+          </h1>
+
+          <p class="mt-3 text-sm font-medium text-primary-600">{item.company}</p>
+
+          <p class="mt-8 border-l-2 border-primary-600 pl-5 text-lg leading-relaxed text-gray-700">
+            {item.description}
+          </p>
+
+          <div class="mt-10">
+            <img
+              src={item.image}
+              alt={item.alt}
+              width={1200}
+              height={800}
+              loading="eager"
+              fetchpriority="high"
+              class="aspect-[3/2] w-full rounded-xs border border-gray-200 object-cover"
+            />
+          </div>
+
+          {
+            results.length > 0 && (
+              <dl class="mt-8 grid grid-cols-3 gap-px border border-gray-200 bg-gray-200">
+                {results.map((result, index) => (
+                  <div
+                    class="bg-white px-4 py-5 text-center"
+                    data-animate
+                    data-delay={(index % 3) * STAGGER}
+                  >
+                    <dd class="text-xl font-bold text-gray-900 md:text-2xl">
+                      {result.value}
+                    </dd>
+                    <dt class="mt-1 text-xs leading-snug text-gray-500">
+                      {result.label}
+                    </dt>
+                  </div>
+                ))}
+              </dl>
+            )
+          }
+
+          <div class="mt-12 space-y-10">
+            {
+              sections.map((section) => (
+                <section data-animate>
+                  <h2 class="text-2xl font-bold text-gray-900">{section.heading}</h2>
+                  {section.paragraphs.map((paragraph) => (
+                    <p class="mt-4 leading-relaxed text-gray-700">{paragraph}</p>
+                  ))}
+                  {section.bullets && (
+                    <ul class="mt-4 space-y-2">
+                      {section.bullets.map((bullet) => (
+                        <li class="flex gap-3 text-gray-700">
+                          <span
+                            class="mt-2 h-1.5 w-1.5 shrink-0 bg-primary-600"
+                            aria-hidden="true"
+                          />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))
+            }
+          </div>
+
+          <AuthorCard />
+        </div>
+
+        <aside class="lg:sticky lg:top-24 lg:self-start">
+          <div class="card p-6">
+            <h2 class="eyebrow">At a glance</h2>
+            <dl class="mt-4 space-y-3 text-sm">
+              <div
+                class="flex justify-between gap-4 border-b border-gray-100 pb-3"
+                data-animate
+              >
+                <dt class="text-gray-500">Customer</dt>
+                <dd class="text-right font-medium text-gray-900">{item.company}</dd>
+              </div>
+              <div
+                class="flex justify-between gap-4 border-b border-gray-100 pb-3"
+                data-animate
+              >
+                <dt class="text-gray-500">Market</dt>
+                <dd class="text-right font-medium text-gray-900">{item.country}</dd>
+              </div>
+              <div
+                class="flex justify-between gap-4 border-b border-gray-100 pb-3"
+                data-animate
+              >
+                <dt class="text-gray-500">Model</dt>
+                <dd class="text-right font-medium text-gray-900">{item.industry}</dd>
+              </div>
+              <div
+                class="flex justify-between gap-4 border-b border-gray-100 pb-3"
+                data-animate
+              >
+                <dt class="text-gray-500">Year</dt>
+                <dd class="text-right font-medium text-gray-900">{item.year}</dd>
+              </div>
+              <div class="flex justify-between gap-4" data-animate>
+                <dt class="text-gray-500">Volume</dt>
+                <dd class="text-right font-medium text-gray-900">{item.volume}</dd>
+              </div>
+            </dl>
+
+            <blockquote class="mt-6 border-l-2 border-primary-600 bg-primary-50 py-4 pl-4 pr-3">
+              <p class="text-sm italic leading-relaxed text-gray-700">
+                &ldquo;{item.quote}&rdquo;
+              </p>
+              {
+                item.quoteBy && (
+                  <footer class="mt-2 text-xs font-medium text-gray-500">
+                    {item.quoteBy}
+                  </footer>
+                )
+              }
+            </blockquote>
+
+            <a href="/contact/" class="btn-outline mt-6 w-full px-4 py-2 text-sm">
+              Start a similar project
+            </a>
+          </div>
+        </aside>
+      </div>
+    </article>
+
+    {
+      related.length > 0 && (
+        <CaseStudies
+          cases={related}
+          title="More case studies"
+          subtitle="Other display programmes delivered for brands, retail chains and distributors."
+        />
+      )
+    }
+
+    <FinalCTA
+      title={caseDetailCta.title}
+      description={caseDetailCta.description}
+      primary={{ label: "Request a Quote", href: "/contact/" }}
+      secondary={{ label: "See Reference Builds", href: "/pop-retail-displays/" }}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

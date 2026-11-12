@@ -1,0 +1,162 @@
+---
+import { Play } from "lucide-react";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import PageHeader from "../components/PageHeader.tsx";
+import SectionHeader from "../components/SectionHeader.tsx";
+import Certifications from "../components/Certifications.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import {
+  qualityHeader,
+  qualityIntro,
+  qualityGates,
+  qualityTests,
+  qualityCompliance,
+  qualityInspectionTitle,
+  qualityInspectionImages,
+  qualityReportTitle,
+  qualityReportNote,
+  qualityVideos,
+  qualityCta,
+} from "../data/quality";
+---
+
+<BaseLayout
+  title="Quality Control"
+  description="Three inspection gates, six tests on every batch, results filed under the batch number — the inspection sheet and test footage ship with your order."
+>
+  <Header client:load />
+
+  <main class="flex-grow">
+    <PageHeader
+      title={qualityHeader.title}
+      subtitle={qualityHeader.subtitle}
+      breadcrumbs={qualityHeader.breadcrumbs}
+    />
+
+    <!-- Intro: the protocol in one paragraph -->
+    <section class="section pb-0">
+      <div class="container-page">
+        <p class="max-w-3xl text-lg leading-relaxed text-gray-600">
+          {qualityIntro}
+        </p>
+      </div>
+    </section>
+
+    <!-- Three gates -->
+    <section class="section pb-0">
+      <div class="container-page">
+        <SectionHeader title="Three Inspection Gates" align="left" />
+        <div class="grid gap-4 md:grid-cols-3">
+          {
+            qualityGates.map((gate) => (
+              <div class="border-t-2 border-primary-600 bg-white p-6" data-animate>
+                <p class="text-xs font-bold tracking-wider text-primary-600 uppercase">
+                  {gate.stage}
+                </p>
+                <h3 class="mt-2 text-base font-semibold text-gray-900">
+                  {gate.title}
+                </h3>
+                <p class="mt-2 text-sm leading-relaxed text-gray-600">
+                  {gate.body}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Six tests -->
+    <section class="section pb-0">
+      <div class="container-page">
+        <SectionHeader
+          title="Six Tests on Every Batch"
+          subtitle={qualityCompliance}
+          align="left"
+        />
+        <ul class="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          {
+            qualityTests.map((test) => (
+              <li class="border-l border-gray-200 pl-4" data-animate>
+                <span class="block text-sm font-semibold text-gray-900">
+                  {test.name}
+                </span>
+                <span class="block text-xs leading-relaxed text-gray-500">
+                  {test.method}
+                </span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <!-- Inspection photography -->
+    <section class="section pb-0">
+      <div class="container-page">
+        <SectionHeader title={qualityInspectionTitle} align="left" />
+        <div class="grid gap-4 sm:grid-cols-3" data-animate>
+          {
+            qualityInspectionImages.map((image) => (
+              <div class="overflow-hidden rounded-card bg-gray-100">
+                <img
+                  src={image.src}
+                  alt={image.alt}
+                  loading="lazy"
+                  class="aspect-[4/3] w-full object-cover"
+                />
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- Test footage placeholders: swap each inner div for an <iframe> once
+         the YouTube IDs for the load / drop / assembly videos exist -->
+    <section class="section pb-0">
+      <div class="container-page">
+        <SectionHeader title="Watch the Tests Run" align="left" />
+        <div class="grid gap-3 sm:grid-cols-3">
+          {
+            qualityVideos.map((video) => (
+              <div class="flex aspect-video flex-col items-center justify-center gap-1.5 rounded-xs border border-dashed border-gray-300 bg-gray-50 text-center">
+                <Play className="h-6 w-6 text-primary-600" aria-hidden="true" />
+                <span class="text-sm font-medium text-gray-700">
+                  {video.label}
+                </span>
+                <span class="text-xs text-gray-400">Video coming soon</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- The report: what the buyer physically receives -->
+    <section class="section pb-0">
+      <div class="container-page">
+        <div class="border border-gray-200 bg-gray-50 p-6 md:p-8" data-animate>
+          <h2 class="font-display text-2xl font-bold text-gray-900">
+            {qualityReportTitle}
+          </h2>
+          <p class="mt-3 max-w-3xl leading-relaxed text-gray-600">
+            {qualityReportNote}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Certifications: same marks as the home page and /about-us/ -->
+    <Certifications />
+
+    <FinalCTA
+      title={qualityCta.title}
+      description={qualityCta.description}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,117 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.tsx";
+import Footer from "../../components/Footer.tsx";
+import CataloguePage from "../../components/CataloguePage.astro";
+import ProductDetail from "../../components/ProductDetail.astro";
+import { industryCategories, styleCategories } from "../../data/categories";
+import { products, productsByCategory, productsByIndustry } from "../../data/products";
+import type { Category, Product } from "../../types";
+
+/**
+ * Everything in the catalogue shares one address space:
+ * /pop-retail-displays/<slug>/
+ * — style listings    (e.g. floor-standing-displays)
+ * — industry listings (e.g. cosmetics-displays), no separate /industries/ prefix
+ * — product pages, with no category segment in front of the product slug
+ */
+type Props =
+  | { kind: "style"; category: Category }
+  | { kind: "industry"; category: Category }
+  | { kind: "product"; product: Product };
+
+export function getStaticPaths() {
+  const paths = [
+    ...styleCategories.map((category) => ({
+      params: { slug: category.slug },
+      props: { kind: "style" as const, category },
+    })),
+    ...industryCategories.map((category) => ({
+      params: { slug: category.slug },
+      props: { kind: "industry" as const, category },
+    })),
+    ...products.map((product) => ({
+      params: { slug: product.slug },
+      props: { kind: "product" as const, product },
+    })),
+  ];
+
+  /** One slug, one page: a product may never overwrite a category listing */
+  const seen = new Set<string>();
+  for (const { params } of paths) {
+    if (seen.has(params.slug)) {
+      throw new Error(`Duplicate catalogue slug "${params.slug}" under /pop-retail-displays/`);
+    }
+    seen.add(params.slug);
+  }
+
+  return paths;
+}
+
+const props: Props = Astro.props;
+
+const meta =
+  props.kind === "product"
+    ? {
+        title: props.product.name,
+        description: props.product.description,
+        image: props.product.images[0]?.src,
+      }
+    : props.kind === "industry"
+      ? {
+          title: `Display Stands for ${props.category.name}`,
+          description: props.category.description,
+          image: props.category.image,
+        }
+      : {
+          title: props.category.name,
+          description: props.category.description,
+          image: props.category.image,
+        };
+
+/** The hub is the parent of every listing; industries no longer get their own section */
+const listing =
+  props.kind === "style"
+    ? {
+        title: props.category.name,
+        subtitle: `${props.category.description} Every build here is a starting point: we re-draw it around your product, your shelf and your brand.`,
+        breadcrumbs: [
+          { label: "POP Retail Displays", href: "/pop-retail-displays/" },
+          { label: props.category.name },
+        ],
+        items: productsByCategory(props.category.slug),
+        activeSlug: props.category.slug,
+      }
+    : props.kind === "industry"
+      ? {
+          title: `Display Stands for ${props.category.name}`,
+          subtitle: `${props.category.description} The builds below are starting points for this sector, not stock — we re-size, re-print and re-finish them for your planogram.`,
+          breadcrumbs: [
+            { label: "POP Retail Displays", href: "/pop-retail-displays/" },
+            { label: props.category.name },
+          ],
+          items: productsByIndustry(props.category.slug),
+          activeSlug: props.category.slug,
+        }
+      : null;
+---
+
+<BaseLayout title={meta.title} description={meta.description} image={meta.image}>
+  <Header client:load />
+
+  {props.kind === "product" && <ProductDetail product={props.product} />}
+
+  {
+    listing && (
+      <CataloguePage
+        title={listing.title}
+        subtitle={listing.subtitle}
+        breadcrumbs={listing.breadcrumbs}
+        items={listing.items}
+        activeSlug={listing.activeSlug}
+      />
+    )
+  }
+
+  <Footer />
+</BaseLayout>

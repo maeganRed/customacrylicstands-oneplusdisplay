@@ -1,0 +1,34 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import CataloguePage from "../components/CataloguePage.astro";
+import {
+  CATALOGUE_PAGE_SIZE,
+  catalogueSubtitle,
+  products,
+} from "../data/products";
+
+const totalPages = Math.max(1, Math.ceil(products.length / CATALOGUE_PAGE_SIZE));
+const items = products.slice(0, CATALOGUE_PAGE_SIZE);
+---
+
+<BaseLayout
+  title="POP Retail Display Builds"
+  description="Reference builds for custom acrylic and PVC foam board POP displays: floor-standing, countertop, pegboard and hook, collectible and toy, LED, spinner and rotating units. Each one is re-drawn to your product, shelf and brand."
+>
+  <Header client:load />
+
+  <CataloguePage
+    title="POP Retail Display Builds"
+    subtitle={catalogueSubtitle}
+    breadcrumbs={[{ label: "POP Retail Displays" }]}
+    items={items}
+    currentPage={1}
+    totalPages={totalPages}
+    basePath="/pop-retail-displays/"
+    pageBasePath="/pop-retail-displays/page"
+  />
+
+  <Footer />
+</BaseLayout>

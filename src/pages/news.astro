@@ -1,0 +1,23 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import LatestNews from "../components/LatestNews.tsx";
+---
+
+<BaseLayout
+  title="News"
+  description="Buying guides and production notes from the One Plus Display factory: acrylic versus PVC foam board, MOQ and sampling terms, lead times and export packing."
+>
+  <Header client:load />
+
+  <main class="flex-grow">
+    <LatestNews
+      title="Buying Guides & Production Notes"
+      subtitle="What we have learned building acrylic and PVC foam board displays: material choice, order terms and freight."
+      action={null}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

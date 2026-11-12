@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import PageHeader from "../components/PageHeader.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import ProcessSteps from "../components/ProcessSteps.tsx";
+import {
+  orderProcessIntro,
+  orderTerms,
+  orderProcessCta,
+} from "../data/orderProcess";
+---
+
+<BaseLayout
+  title="Order Process"
+  description="How a display stand order runs at One Plus Display: free 3D render, quotation, sample built in 48 hours, 12–15 days bulk production, inspection and export packing on FOB, CIF or DDP terms."
+>
+  <Header client:load />
+
+  <PageHeader
+    title="Order Process"
+    subtitle="From brief and free 3D render to sampling, production and the container — six steps, each with a fixed deliverable."
+    breadcrumbs={[{ label: "Order Process" }]}
+  />
+
+  <main class="flex-grow">
+    <section class="section">
+      <div class="container-page grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-7">
+          <p class="eyebrow mb-3">What happens, in order</p>
+          <p class="mb-10 max-w-2xl text-lg leading-relaxed text-gray-600">
+            {orderProcessIntro}
+          </p>
+
+          {/* Same component and same data as the home page process block */}
+          <ProcessSteps variant="full" />
+        </div>
+
+        <aside class="lg:col-span-5">
+          <div class="sticky top-24 rounded-xs border border-gray-100 bg-gray-50 p-6">
+            <h2 class="mb-4 font-semibold text-gray-900">Terms at a glance</h2>
+            <dl class="space-y-3 text-sm">
+              {
+                orderTerms.map((term) => (
+                  <div
+                    class="flex justify-between gap-4 border-b border-gray-200 pb-3 last:border-0 last:pb-0"
+                    data-animate
+                  >
+                    <dt class="text-gray-500">{term.label}</dt>
+                    <dd class="text-right font-medium text-gray-900">{term.value}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+            <a href="/contact/" class="btn-primary mt-6 w-full px-4 py-2 text-sm">
+              Request a Quote
+            </a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <FinalCTA
+      title={orderProcessCta.title}
+      description={orderProcessCta.description}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

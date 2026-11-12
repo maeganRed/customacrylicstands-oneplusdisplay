@@ -1,0 +1,381 @@
+---
+import { ArrowRight } from "lucide-react";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import PageHeader from "../components/PageHeader.tsx";
+import SectionHeader from "../components/SectionHeader.tsx";
+import Certifications from "../components/Certifications.tsx";
+import FaqAccordion from "../components/FaqAccordion.tsx";
+import FactoryShowcase from "../components/FactoryShowcase.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import { categoryHref } from "../data/routes";
+import { industryCategories, styleCategories } from "../data/categories";
+import {
+  aboutFactorySlides,
+  aboutFaq,
+  aboutGlobal,
+  aboutIntro,
+  aboutMilestones,
+  aboutProcess,
+  aboutSections,
+  aboutStats,
+  aboutTeam,
+} from "../data/about";
+
+/** Cards in the same row appear 60ms apart */
+const STAGGER = 60;
+
+/** Paragraphs after the one that sits under the lead, rendered below the photo */
+const profileBody = aboutIntro.paragraphs.slice(1);
+---
+
+<BaseLayout
+  title="About One Plus Display | Custom Display Manufacturer in China"
+  description="One Plus Display is a custom acrylic and PVC foam board display stand manufacturer in Dongguan, China — a 23,000 m² plant, a 150-person team and 13 years of retail display production."
+>
+  <Header client:load />
+
+  <main class="flex-grow">
+    <PageHeader
+      title="Custom Display Manufacturer in China for Retail Brands"
+      subtitle="One Plus Display designs and builds custom acrylic and PVC foam board display stands in Dongguan, China — from the first drawing to the loaded container."
+      breadcrumbs={[{ label: "About Us" }]}
+    />
+
+    {/* 01 — Company profile: copy and photo, then the quick links */}
+    <section class="section">
+      <div class="container-page">
+        <div class="grid items-start gap-10 lg:grid-cols-12 lg:gap-16">
+          <div class="lg:col-span-7">
+            <p class="eyebrow mb-3">{aboutIntro.eyebrow}</p>
+            <h2 class="section-title mb-6">{aboutIntro.title}</h2>
+            <p class="mb-6 text-lg leading-relaxed text-gray-700">
+              {aboutIntro.lead}
+            </p>
+            <p class="text-gray-600">{aboutIntro.paragraphs[0]}</p>
+          </div>
+
+          <aside class="lg:col-span-5 lg:row-span-2">
+            <figure>
+              <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                <img
+                  src={aboutIntro.image}
+                  alt={aboutIntro.imageAlt}
+                  loading="lazy"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+              <figcaption class="mt-3 text-sm text-gray-500">
+                {aboutIntro.imageCaption}
+              </figcaption>
+            </figure>
+          </aside>
+
+          <div class="lg:col-span-7">
+            <div class="space-y-4 text-gray-600">
+              {profileBody.map((paragraph) => <p>{paragraph}</p>)}
+            </div>
+
+            <p class="mt-8 border-l-2 border-primary-600 pl-4 text-base font-medium text-gray-900">
+              {aboutIntro.signature}
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-x-8 gap-y-3">
+              {
+                aboutIntro.links.map((link) => (
+                  <a
+                    href={link.href}
+                    class="inline-flex items-center gap-1 font-medium text-primary-600 hover:underline"
+                  >
+                    {link.label}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* 02 — What we manufacture: the full product-center menu as a compact
+        two-panel link list (by style / by sector) — text only, deliberately
+        lighter than the image-tile grids on the home page */}
+    <section class="section bg-gray-50">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={aboutSections.builds.eyebrow}
+          title={aboutSections.builds.title}
+          subtitle={aboutSections.builds.subtitle}
+        />
+
+        <div class="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2" data-animate>
+          <nav class="border border-gray-200 bg-white p-6 sm:p-8" aria-label="Display styles">
+            <p class="eyebrow mb-4">{aboutSections.builds.stylesLabel}</p>
+            <ul class="grid gap-x-8 gap-y-1 sm:grid-cols-2">
+              {
+                styleCategories.map((category) => (
+                  <li>
+                    <a
+                      href={categoryHref(category)}
+                      class="group flex items-center justify-between gap-2 py-2 text-sm font-medium text-gray-700 transition-colors hover:text-primary-600"
+                    >
+                      {category.name}
+                      <ArrowRight
+                        className="h-4 w-4 shrink-0 text-primary-600 opacity-0 transition-opacity group-hover:opacity-100"
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+
+          <nav class="border border-gray-200 bg-white p-6 sm:p-8" aria-label="Retail sectors">
+            <p class="eyebrow mb-4">{aboutSections.builds.industriesLabel}</p>
+            <ul class="grid gap-x-8 gap-y-1 sm:grid-cols-2">
+              {
+                industryCategories.map((category) => (
+                  <li>
+                    <a
+                      href={categoryHref(category)}
+                      class="group flex items-center justify-between gap-2 py-2 text-sm font-medium text-gray-700 transition-colors hover:text-primary-600"
+                    >
+                      {category.name}
+                      <ArrowRight
+                        className="h-4 w-4 shrink-0 text-primary-600 opacity-0 transition-opacity group-hover:opacity-100"
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+        </div>
+
+        <div class="mt-8 flex justify-center" data-animate>
+          <a
+            href={aboutSections.builds.viewAll.href}
+            class="inline-flex items-center gap-1 font-medium text-primary-600 hover:underline"
+          >
+            {aboutSections.builds.viewAll.label}
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* 03 — End-to-end manufacturing process: real photos beside the eight steps */}
+    <section class="section">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={aboutSections.process.eyebrow}
+          title={aboutSections.process.title}
+          subtitle={aboutSections.process.subtitle}
+        />
+
+        <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-16">
+          <div class="lg:sticky lg:top-24">
+            <FactoryShowcase client:visible slides={aboutFactorySlides} />
+            <p class="mt-4 text-sm leading-relaxed text-gray-500">
+              {aboutSections.process.caption}
+            </p>
+          </div>
+
+          <ol class="border-t border-gray-200">
+            {
+              aboutProcess.map((step, index) => (
+                <li
+                  class="grid grid-cols-[2.5rem_1fr] gap-4 border-b border-gray-200 py-4 sm:grid-cols-[3rem_1fr]"
+                  data-animate
+                  data-delay={Math.min(index, 2) * STAGGER}
+                >
+                  <span class="text-sm font-bold leading-6 text-primary-600">
+                    {step.step}
+                  </span>
+                  <div>
+                    <h3 class="text-base font-semibold text-gray-900">
+                      {step.title}
+                    </h3>
+                    <p class="mt-1 text-sm leading-relaxed text-gray-600">
+                      {step.text}
+                    </p>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    {/* 04 — Meet our expert team: two per row on phones so the group reads in one screen */}
+    <section class="section bg-gray-50">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={aboutSections.team.eyebrow}
+          title={aboutSections.team.title}
+          subtitle={aboutSections.team.subtitle}
+        />
+
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-5">
+          {
+            aboutTeam.map((member, index) => (
+              <article
+                class="flex flex-col border border-gray-100 bg-white shadow-sm"
+                data-animate
+                data-delay={(index % 5) * STAGGER}
+              >
+                <div class="aspect-square overflow-hidden bg-gray-100">
+                  <img
+                    src={member.image}
+                    alt={member.alt}
+                    loading="lazy"
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+                <div class="flex flex-1 flex-col p-4">
+                  <h3 class="text-base font-semibold text-gray-900">
+                    {member.name}
+                  </h3>
+                  <p class="mt-1 text-xs font-semibold uppercase leading-relaxed tracking-wide text-primary-600">
+                    {member.role}
+                  </p>
+                  <p class="mt-3 hidden text-sm leading-relaxed text-gray-600 sm:block">
+                    {member.bio}
+                  </p>
+                  {member.href && (
+                    <a
+                      href={member.href}
+                      class="mt-4 hidden items-center gap-1 text-sm font-semibold text-primary-600 hover:underline sm:inline-flex"
+                    >
+                      View profile
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    {/* 05 — Manufacturing facilities: the numbers, then the milestones timeline */}
+    <section class="section">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={aboutSections.facilities.eyebrow}
+          title={aboutSections.facilities.title}
+          subtitle={aboutSections.facilities.subtitle}
+        />
+
+        <dl
+          class="grid grid-cols-2 gap-x-6 gap-y-8 border-b border-gray-200 pb-10 sm:gap-x-8 lg:grid-cols-4"
+          data-animate
+        >
+          {
+            aboutStats.map((stat) => (
+              <div class="flex flex-col-reverse border-l border-gray-200 pl-5">
+                <dt class="mt-1 text-xs leading-relaxed text-gray-500">
+                  {stat.label}
+                </dt>
+                <dd class="text-2xl font-bold text-gray-900 md:text-3xl">
+                  {stat.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <ol class="mx-auto mt-12 max-w-4xl border-l border-gray-200">
+          {
+            aboutMilestones.map((milestone) => (
+              <li
+                class="relative grid gap-2 pb-10 pl-6 last:pb-0 md:grid-cols-[7rem_1fr] md:gap-8 md:pl-8"
+                data-animate
+              >
+                <span
+                  class="absolute -left-[5px] top-2 h-2.5 w-2.5 rounded-full bg-primary-600 ring-4 ring-white"
+                  aria-hidden="true"
+                />
+                <div class="text-sm font-bold tracking-wider text-primary-600">
+                  {milestone.year}
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900">
+                    {milestone.title}
+                  </h3>
+                  <p class="mt-2 text-gray-600">{milestone.description}</p>
+                  <p class="mt-3 text-xs font-bold uppercase tracking-wider text-gray-400">
+                    {milestone.tag}
+                  </p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </section>
+
+    {/* 06 — Global markets: export reach, then the client wall */}
+    <section class="section bg-gray-50">
+      <div class="container-page">
+        <SectionHeader
+          eyebrow={aboutSections.global.eyebrow}
+          title={aboutSections.global.title}
+          subtitle={aboutSections.global.subtitle}
+        />
+
+        <div class="mx-auto grid max-w-4xl items-start gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-16">
+          <div class="space-y-4 text-gray-600">
+            {aboutGlobal.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+          </div>
+
+          <div class="border border-gray-200 bg-white p-5">
+            <p class="eyebrow mb-4">{aboutGlobal.brandsLabel}</p>
+            <ul class="flex flex-wrap gap-2">
+              {
+                aboutGlobal.brands.map((brand) => (
+                  <li class="border border-gray-200 px-3 py-2 text-sm font-semibold tracking-wide text-gray-700">
+                    {brand}
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* 07 — Certifications: same marks and wording as the home page */}
+    <Certifications
+      tone="white"
+      eyebrow={aboutSections.certifications.eyebrow}
+      title={aboutSections.certifications.title}
+      subtitle={aboutSections.certifications.subtitle}
+      action={{ label: "Request certificate copies", href: "/contact/" }}
+    />
+
+    {/* 08 — FAQ: native <details>, zero client JS */}
+    <FaqAccordion
+      eyebrow={aboutSections.faq.eyebrow}
+      title={aboutSections.faq.title}
+      subtitle={aboutSections.faq.subtitle}
+      items={aboutFaq}
+      action={{ label: "Have a different question? Contact our team", href: "/contact/" }}
+    />
+
+    <FinalCTA
+      title={aboutSections.cta.title}
+      description={aboutSections.cta.description}
+      primary={{ label: "Start Your Project", href: "/contact/" }}
+      secondary={{ label: "Contact Our Team", href: "mailto:inquiry@oneplusdisplay.com" }}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

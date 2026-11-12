@@ -1,0 +1,152 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.tsx";
+import Footer from "../../components/Footer.tsx";
+import PageHeader from "../../components/PageHeader.tsx";
+import FinalCTA from "../../components/FinalCTA.tsx";
+import {
+  orderStages,
+  orderStageCta,
+  type OrderStage,
+} from "../../data/orderProcess";
+
+/**
+ * One page per stage of the order process, all built from `orderStages`.
+ * The overview keeps its own page at /order-process/.
+ */
+export function getStaticPaths() {
+  return orderStages.map((stage, index) => ({
+    params: { stage: stage.slug },
+    props: {
+      stage,
+      position: index + 1,
+      previous: index > 0 ? orderStages[index - 1] : undefined,
+      next: index < orderStages.length - 1 ? orderStages[index + 1] : undefined,
+    },
+  }));
+}
+
+interface Props {
+  stage: OrderStage;
+  /** 1-based position, rendered as "Stage 3 of 6" */
+  position: number;
+  previous?: OrderStage;
+  next?: OrderStage;
+}
+
+const { stage, position, previous, next } = Astro.props;
+
+/** Stage pages only carry a slug; the trailing slash matches the sitemap */
+const stageHref = (item: OrderStage): string => `/order-process/${item.slug}/`;
+---
+
+<BaseLayout title={stage.title} description={stage.seoDescription}>
+  <Header client:load />
+
+  <PageHeader
+    title={stage.title}
+    subtitle={stage.subtitle}
+    breadcrumbs={[
+      { label: "Order Process", href: "/order-process/" },
+      { label: stage.label },
+    ]}
+  />
+
+  <main class="flex-grow">
+    <section class="section">
+      <div class="container-page grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div class="lg:col-span-7">
+          <p class="eyebrow mb-3">Stage {position} of {orderStages.length}</p>
+          <p class="max-w-2xl text-lg leading-relaxed text-gray-600">
+            {stage.description}
+          </p>
+
+          {/* Real content is written per stage; until then point at the overview */}
+          <div
+            class="mt-8 rounded-xs border border-gray-100 bg-gray-50 p-6"
+            data-animate
+          >
+            <h2 class="mb-2 font-semibold text-gray-900">
+              Full write-up in preparation
+            </h2>
+            <p class="text-sm leading-relaxed text-gray-600">
+              This stage page is still being written. The complete workflow — from
+              enquiry to container, with the deliverable at each step — is on the
+              order process overview page.
+            </p>
+            <a href="/order-process/" class="btn-outline mt-5 px-4 py-2 text-sm">
+              See the full order process
+            </a>
+          </div>
+        </div>
+
+        <aside class="lg:col-span-5">
+          <div class="sticky top-24 rounded-xs border border-gray-100 bg-gray-50 p-6">
+            <h2 class="mb-4 font-semibold text-gray-900">The six stages</h2>
+            <ol class="space-y-1 text-sm">
+              {
+                orderStages.map((item) => (
+                  <li>
+                    <a
+                      href={stageHref(item)}
+                      aria-current={item.slug === stage.slug ? "page" : undefined}
+                      class={`block rounded-xs px-3 py-2 font-display transition-colors ${
+                        item.slug === stage.slug
+                          ? "bg-white font-medium text-primary-600"
+                          : "text-gray-600 hover:bg-white hover:text-primary-700"
+                      }`}
+                    >
+                      {item.label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ol>
+            <a href="/contact/" class="btn-primary mt-6 w-full px-4 py-2 text-sm">
+              Request a quote for this stage
+            </a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    {/* Previous / next: keeps the six stages walkable in order */}
+    <div class="border-t border-gray-200">
+      <div class="container-page flex flex-wrap items-center justify-between gap-4 py-8">
+        {
+          previous ? (
+            <a
+              href={stageHref(previous)}
+              class="inline-flex items-center gap-2 font-display text-sm text-gray-600 transition-colors hover:text-primary-600"
+            >
+              <span aria-hidden="true">←</span>
+              {previous.label}
+            </a>
+          ) : (
+            <span />
+          )
+        }
+        {
+          next ? (
+            <a
+              href={stageHref(next)}
+              class="inline-flex items-center gap-2 font-display text-sm text-gray-600 transition-colors hover:text-primary-600"
+            >
+              {next.label}
+              <span aria-hidden="true">→</span>
+            </a>
+          ) : (
+            <span />
+          )
+        }
+      </div>
+    </div>
+
+    <FinalCTA
+      title={orderStageCta.title}
+      description={orderStageCta.description}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

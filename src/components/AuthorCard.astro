@@ -1,0 +1,30 @@
+---
+import { authorCard } from "../data/jackLi";
+
+const { name, role, image, imageAlt, bio, ctaCopy, primary, secondary } =
+  authorCard;
+---
+
+<!-- Author card: shared by article and case detail pages -->
+<section class="mt-12 border-t border-gray-200 pt-10" aria-label="About the author">
+  <div class="card flex flex-col gap-6 p-6 sm:flex-row sm:gap-8 md:p-8">
+    <img
+      src={image}
+      alt={imageAlt}
+      width={112}
+      height={112}
+      loading="lazy"
+      class="h-28 w-28 shrink-0 rounded-full object-cover"
+    />
+    <div class="min-w-0">
+      <p class="eyebrow">{role}</p>
+      <h2 class="mt-2 text-lg font-bold text-gray-900">{name}</h2>
+      <p class="mt-3 leading-relaxed text-gray-700">{bio}</p>
+      <p class="mt-3 leading-relaxed text-gray-600">{ctaCopy}</p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href={primary.href} class="btn-primary px-5 py-2 text-sm">{primary.label}</a>
+        <a href={secondary.href} class="btn-outline px-5 py-2 text-sm">{secondary.label}</a>
+      </div>
+    </div>
+  </div>
+</section>

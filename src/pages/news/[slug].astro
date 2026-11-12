@@ -1,0 +1,135 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.tsx";
+import Footer from "../../components/Footer.tsx";
+import Breadcrumbs from "../../components/Breadcrumbs.tsx";
+import LatestNews from "../../components/LatestNews.tsx";
+import FinalCTA from "../../components/FinalCTA.tsx";
+import AuthorCard from "../../components/AuthorCard.astro";
+import {
+  news,
+  newsCta,
+  relatedNews,
+  formatNewsDate,
+} from "../../data/news";
+
+export function getStaticPaths() {
+  return news.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const related = relatedNews(post.slug);
+const breadcrumbs = [
+  { label: "Home", href: "/" },
+  { label: "News", href: "/news/" },
+  { label: post.category },
+];
+---
+
+<BaseLayout title={post.title} description={post.excerpt} image={post.image}>
+  <Header client:load />
+
+  <main class="flex-grow">
+    <!-- Breadcrumb strip -->
+    <div class="border-b border-gray-100 bg-white">
+      <div class="container-page py-4">
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
+    </div>
+
+    <article class="container-page py-10 md:py-14">
+      <div class="mx-auto max-w-3xl">
+        <a
+          href="/news/"
+          class="inline-flex items-center bg-primary-50 px-3 py-1 text-sm font-medium text-primary-700 transition-colors hover:bg-primary-100"
+        >
+          {post.category}
+        </a>
+
+        <h1 class="mt-5 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+          {post.title}
+        </h1>
+
+        <div class="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
+          <span>By {post.author ?? "One Plus Display editorial team"}</span>
+          <span aria-hidden="true">·</span>
+          <span>Published {formatNewsDate(post.date)}</span>
+          {post.updated && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>Updated {formatNewsDate(post.updated)}</span>
+            </>
+          )}
+          {post.readMinutes && (
+            <>
+              <span aria-hidden="true">·</span>
+              <span>{post.readMinutes} min read</span>
+            </>
+          )}
+        </div>
+
+        <p class="mt-8 border-l-2 border-primary-600 pl-5 text-lg leading-relaxed text-gray-700">
+          {post.excerpt}
+        </p>
+
+        <div class="mt-10">
+          <img
+            src={post.image}
+            alt={post.alt}
+            width={1200}
+            height={675}
+            loading="eager"
+            fetchpriority="high"
+            class="aspect-[16/9] w-full rounded-xs border border-gray-200 object-cover"
+          />
+        </div>
+
+        <div class="mt-12 space-y-10">
+          {
+            (post.body ?? []).map((section) => (
+              <section data-animate>
+                <h2 class="text-2xl font-bold text-gray-900">{section.heading}</h2>
+                {section.paragraphs.map((paragraph) => (
+                  <p class="mt-4 leading-relaxed text-gray-700">{paragraph}</p>
+                ))}
+                {section.bullets && (
+                  <ul class="mt-4 space-y-2">
+                    {section.bullets.map((bullet) => (
+                      <li class="flex gap-3 text-gray-700">
+                        <span class="mt-2 h-1.5 w-1.5 shrink-0 bg-primary-600" aria-hidden="true" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            ))
+          }
+        </div>
+
+        <AuthorCard />
+      </div>
+    </article>
+
+    {related.length > 0 && (
+      <LatestNews
+        posts={related}
+        title="Related reading"
+        subtitle="More updates from the factory floor."
+        action={null}
+      />
+    )}
+
+    <FinalCTA
+      title={newsCta.title}
+      description={newsCta.description}
+      primary={{ label: "Request a Quote", href: "/contact/" }}
+      secondary={{ label: "See reference builds", href: "/pop-retail-displays/" }}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

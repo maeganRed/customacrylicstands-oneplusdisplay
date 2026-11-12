@@ -1,0 +1,35 @@
+{
+  "name": "ecoride-ebike-template",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Component-driven Astro + React + Tailwind template for an e-bike manufacturer website",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/react": "^6.0.6",
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^6.4.8",
+    "intl-tel-input": "^29.5.11",
+    "lucide-react": "^0.562.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "typescript": "^5.9.0"
+  },
+  "overrides": {
+    "vite": "^7.1.0"
+  }
+}

@@ -1,0 +1,733 @@
+---
+import { ArrowRight, Check, Play } from "lucide-react";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Hero from "../components/Hero.tsx";
+import SectionHeader from "../components/SectionHeader.tsx";
+import ProductCategories from "../components/ProductCategories.tsx";
+import FeaturedProducts from "../components/FeaturedProducts.tsx";
+import FactoryShowcase from "../components/FactoryShowcase.tsx";
+import ProcessSteps from "../components/ProcessSteps.tsx";
+import CaseStudies from "../components/CaseStudies.tsx";
+import Certifications from "../components/Certifications.tsx";
+import Testimonials from "../components/Testimonials.tsx";
+import LatestNews from "../components/LatestNews.tsx";
+import FaqAccordion from "../components/FaqAccordion.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import Footer from "../components/Footer.tsx";
+import { site } from "../data/site";
+import { certifications } from "../data/certifications";
+import { featuredProducts } from "../data/products";
+import { styleCategories } from "../data/categories";
+import { categoryHref, productHref } from "../data/routes";
+import {
+  homeCapabilities,
+  homeCertifications,
+  homeCta,
+  homeCustomizationRows,
+  homeDefinition,
+  homeFactoryImage,
+  homeFaq,
+  homeFaqCta,
+  homeFaqSubtitle,
+  homeFaqTitle,
+  homeInspectionImages,
+  homeOffer,
+  homeQuality,
+  homeSpecStrip,
+  homeSections,
+  homeTrustBar,
+  homeVideo,
+  homeWhy,
+} from "../data/home";
+
+/** One organization node, referenced by @id from every other schema block */
+const organizationId = `${site.url}/#organization`;
+const websiteId = `${site.url}/#website`;
+const serviceId = `${site.url}/#service`;
+
+/** Facts the manufacturer states about itself; mirrored in the bands, the
+    factory section and the FAQ, so nothing on the page contradicts the schema */
+const organizationSchema = {
+  "@type": "Organization",
+  "@id": organizationId,
+  name: site.name,
+  legalName: site.legalName,
+  url: site.url,
+  logo: new URL(site.logo.src, site.url).href,
+  description: site.seo.defaultDescription,
+  slogan: "Factory-direct custom acrylic and PVC display manufacturing",
+  foundingDate: "2013",
+  numberOfEmployees: { "@type": "QuantitativeValue", value: 150 },
+  email: site.contact.email,
+  telephone: site.contact.phone,
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: site.contact.address,
+    addressLocality: "Dongguan",
+    addressRegion: "Guangdong",
+    postalCode: "523287",
+    addressCountry: "CN",
+  },
+  contactPoint: {
+    "@type": "ContactPoint",
+    name: site.persona.name,
+    contactType: "sales",
+    email: site.contact.email,
+    telephone: site.contact.phone,
+    availableLanguage: ["English", "Chinese"],
+  },
+  areaServed: ["United States", "Europe", "Australia", "Middle East"],
+  knowsAbout: [
+    "Custom acrylic display stands",
+    "PVC foam board display stands",
+    "POP retail displays",
+    "OEM and ODM display manufacturing",
+  ],
+  hasCertification: certifications.map((item) => ({
+    "@type": "Certification",
+    name: item.name,
+  })),
+  sameAs: site.social.map((account) => account.href),
+};
+
+const websiteSchema = {
+  "@type": "WebSite",
+  "@id": websiteId,
+  url: site.url,
+  name: site.name,
+  inLanguage: "en",
+  publisher: { "@id": organizationId },
+};
+
+const webPageSchema = {
+  "@type": "WebPage",
+  "@id": `${site.url}/#webpage`,
+  url: new URL("/", site.url).href,
+  name: site.seo.defaultTitle,
+  description: site.seo.defaultDescription,
+  isPartOf: { "@id": websiteId },
+  about: { "@id": organizationId },
+  inLanguage: "en",
+};
+
+const serviceSchema = {
+  "@type": "Service",
+  "@id": serviceId,
+  serviceType: "Custom acrylic and PVC retail display manufacturing",
+  provider: { "@id": organizationId },
+  areaServed: ["United States", "Europe", "Australia", "Middle East"],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Custom display manufacturing services",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Custom acrylic display stands",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "PVC foam board display stands",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "OEM and ODM display manufacturing",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Prototype and sample development",
+        },
+      },
+    ],
+  },
+};
+
+const productListSchema = {
+  "@type": "ItemList",
+  "@id": `${site.url}/#featured-builds`,
+  name: "Featured custom display builds",
+  itemListElement: featuredProducts.map((product, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: product.name,
+    url: new URL(productHref(product.slug), site.url).href,
+  })),
+};
+
+const styleListSchema = {
+  "@type": "ItemList",
+  "@id": `${site.url}/#display-styles`,
+  name: "Custom display stand types",
+  itemListElement: styleCategories.map((category, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: category.name,
+    url: new URL(categoryHref(category), site.url).href,
+  })),
+};
+
+const videoSchema = {
+  "@type": "VideoObject",
+  "@id": `${site.url}/#factory-tour`,
+  name: homeVideo.youtubeTitle,
+  description: homeSections.video.subtitle,
+  thumbnailUrl: [
+    `https://i.ytimg.com/vi/${homeVideo.youtubeId}/maxresdefault.jpg`,
+  ],
+  embedUrl: `https://www.youtube-nocookie.com/embed/${homeVideo.youtubeId}`,
+  // [VERIFY] HP-13 upload date — confirm the publish date on YouTube
+  uploadDate: "2025-06-01",
+  publisher: { "@id": organizationId },
+};
+
+/** Answers are the exact strings rendered by <FaqAccordion /> */
+const faqSchema = {
+  "@type": "FAQPage",
+  "@id": `${site.url}/#faq`,
+  mainEntity: homeFaq.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    organizationSchema,
+    websiteSchema,
+    webPageSchema,
+    serviceSchema,
+    productListSchema,
+    styleListSchema,
+    videoSchema,
+    faqSchema,
+  ],
+};
+
+/** Same `**highlight**` convention as <SectionHeader />, for the direct-answer h2 */
+const definitionTitleSegments = homeDefinition.title.split(/\*\*(.+?)\*\*/g);
+const offerTitleSegments = homeOffer.title.split(/\*\*(.+?)\*\*/g);
+---
+
+<BaseLayout description={site.seo.defaultDescription}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <Header client:load />
+
+  <main class="flex-grow">
+    <!-- 01 — Hero: strong-sell slides with the qualifying terms under the h1 -->
+    <Hero client:visible />
+
+    <!-- 02a — Procurement spec strip: the six parameters a buyer screens a
+         factory on, answered in one row before the long copy starts -->
+    <section
+      class="border-y border-gray-200 bg-gray-50"
+      aria-label="Order specifications at a glance"
+    >
+      <div class="container-page py-6 md:py-8">
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-6 lg:gap-x-8">
+          {
+            homeSpecStrip.map((item, index) => (
+              <div
+                class:list={[
+                  "flex flex-col",
+                  index > 0 && "lg:border-l lg:border-gray-200 lg:pl-6",
+                ]}
+                data-animate
+                data-delay={index * 40}
+              >
+                <dt class="text-[11px] font-semibold tracking-wider text-gray-500 uppercase">
+                  {item.label}
+                </dt>
+                <dd class="mt-1.5 font-display text-[15px] leading-snug font-bold text-gray-900 md:text-base">
+                  {item.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <!-- 02 — Factory introduction: the direct answer, the image and the six
+         numbers, in one block. No separate trust band or spec band. -->
+    <section class="section" aria-labelledby="manufacturer-definition">
+      <div class="container-page">
+        <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <h2
+              id="manufacturer-definition"
+              class="font-display text-3xl font-bold leading-tight text-gray-900 md:text-4xl"
+            >
+              {
+                definitionTitleSegments.map((segment, index) =>
+                  index % 2 === 1 ? (
+                    <span class="text-primary-600">{segment}</span>
+                  ) : (
+                    segment
+                  )
+                )
+              }
+            </h2>
+            <p class="mt-5 text-lg leading-relaxed text-gray-600">
+              {homeDefinition.paragraph}
+            </p>
+            <p class="mt-4 text-sm leading-relaxed text-gray-500">
+              {homeDefinition.terms}
+            </p>
+
+            <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+              <a href={homeDefinition.cta.href} class="btn-primary">
+                {homeDefinition.cta.label}
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              </a>
+              {
+                homeDefinition.links.map((link) => (
+                  <a
+                    href={link.href}
+                    class="inline-flex items-center gap-1 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700"
+                  >
+                    {link.label}
+                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="overflow-hidden rounded-card bg-gray-100" data-animate>
+            <img
+              src={homeFactoryImage.src}
+              alt={homeFactoryImage.alt}
+              loading="lazy"
+              class="aspect-[4/3] w-full object-cover"
+            />
+          </div>
+        </div>
+
+        <!-- Trust band as cards: one number per card, centred, so the seven
+             figures read as a scan rather than a paragraph of stats -->
+        <dl class="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+          {
+            homeTrustBar.map((item, index) => (
+              <div
+                class="flex flex-col-reverse items-center justify-center gap-1 rounded-xs border border-gray-200 bg-white px-3 py-5 text-center"
+                data-animate
+                data-delay={index * 40}
+              >
+                <dt class="text-xs leading-snug font-medium text-gray-500">
+                  {item.label}
+                </dt>
+                <dd class="font-display text-xl font-bold text-primary-600 md:text-2xl">
+                  {item.value}
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <!-- Certificate block: the six marks with their one-line meaning and
+             the link for copies, replacing the former one-line text row -->
+        <div class="mt-10">
+          <Certifications
+            variant="strip"
+            size="lg"
+            eyebrow={homeCertifications.eyebrow}
+            title={homeCertifications.title}
+            subtitle={homeCertifications.subtitle}
+            action={homeSections.certifications.cta}
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- 02b — Offer block: what arrives before payment on the left, the
+         quantity tiers on the right. Static markup, no client script. -->
+    <section class="section pt-0" aria-labelledby="offer">
+      <div class="container-page grid gap-6 lg:grid-cols-[1.15fr_1fr]">
+        <div class="border border-gray-200 bg-white p-6 md:p-8" data-animate>
+          <p class="eyebrow">{homeOffer.eyebrow}</p>
+          <h2
+            id="offer"
+            class="mt-3 font-display text-2xl leading-tight font-bold text-gray-900 md:text-3xl"
+          >
+            {
+              offerTitleSegments.map((segment, index) =>
+                index % 2 === 1 ? (
+                  <span class="text-primary-600">{segment}</span>
+                ) : (
+                  segment
+                )
+              )
+            }
+          </h2>
+          <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+            {
+              homeOffer.items.map((item) => (
+                <li class="flex gap-3 text-sm leading-relaxed text-gray-700">
+                  <Check
+                    className="mt-0.5 h-4 w-4 shrink-0 text-primary-600"
+                    aria-hidden="true"
+                  />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+          <p class="mt-6 border-t border-gray-200 pt-4 text-xs leading-relaxed text-gray-500">
+            {homeOffer.note}
+          </p>
+        </div>
+
+        <div class="bg-navy-950 p-6 text-white md:p-8" data-animate data-delay="60">
+          <p class="eyebrow text-primary-200">Quantity tiers</p>
+          <h3 class="mt-3 font-display text-xl leading-tight font-bold">
+            {homeOffer.tiersTitle}
+          </h3>
+          <dl class="mt-5 divide-y divide-white/10 border-y border-white/10">
+            {
+              homeOffer.tiers.map((tier) => (
+                <div class="flex items-baseline justify-between gap-4 py-3">
+                  <dt class="text-sm font-medium text-white">{tier.label}</dt>
+                  <dd class="text-sm font-semibold text-primary-200">{tier.value}</dd>
+                </div>
+              ))
+            }
+          </dl>
+          <a href={homeOffer.cta.href} class="btn-light mt-6 w-full">
+            {homeOffer.cta.label}
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 — Category entry points: style tiles and industry links, titles only -->
+    <ProductCategories
+      title={homeSections.categories.title}
+      subtitle={homeSections.categories.subtitle}
+      action={homeSections.categories.cta}
+    />
+
+    <!-- 04 — Featured builds -->
+    <FeaturedProducts
+      align="center"
+      title={homeSections.products.title}
+      subtitle={homeSections.products.subtitle}
+      action={homeSections.products.cta}
+    />
+
+    <!-- 05 — Customisation as a spec sheet: sticky heading on the left, three
+         numbered spec rows on the right (distinct from the alternating rows
+         the Why section below uses) -->
+    <section class="section bg-gray-50" id="customization">
+      <div class="container-page">
+        <div class="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-16">
+          <div class="lg:sticky lg:top-24 lg:self-start" data-animate>
+            <SectionHeader
+              title={homeSections.customization.title}
+              subtitle={homeSections.customization.subtitle}
+              align="left"
+            />
+            <a
+              href={homeSections.customization.cta.href}
+              class="btn-primary mt-2 inline-flex"
+            >
+              {homeSections.customization.cta.label}
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </a>
+          </div>
+
+          <ol class="space-y-6">
+            {
+              homeCustomizationRows.map((row, index) => (
+                <li
+                  class="border-t-2 border-primary-600 bg-white p-6 md:p-8"
+                  data-animate
+                  data-delay={index * 60}
+                >
+                  <div class="grid gap-6 sm:grid-cols-[8rem_1fr]">
+                    <div class="overflow-hidden rounded-xs bg-gray-100">
+                      <img
+                        src={row.image.src}
+                        alt={row.image.alt}
+                        loading="lazy"
+                        class="aspect-square h-full w-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p class="eyebrow">Spec {String(index + 1).padStart(2, "0")}</p>
+                      <h3 class="mt-2 font-display text-xl font-bold leading-tight text-gray-900 md:text-2xl">
+                        {row.title}
+                      </h3>
+                      <p class="mt-3 leading-relaxed text-gray-600">
+                        {row.body}
+                      </p>
+                      <ul class="mt-4 flex flex-wrap gap-2">
+                        {row.points.map((point) => (
+                          <li class="chip">{point}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 — Why: three wide image/text rows, alternating sides -->
+    <section class="section" id="why">
+      <div class="container-page">
+        <SectionHeader
+          title={homeWhy.title}
+          subtitle={homeWhy.intro}
+          align="center"
+        />
+
+        <div class="mt-14 space-y-16 lg:space-y-24">
+          <!-- Row 1 — the plant -->
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div
+              id="factory"
+              class="overflow-hidden rounded-card bg-gray-100"
+              data-animate
+            >
+              <FactoryShowcase client:visible />
+            </div>
+
+            <div>
+              <h3 class="font-display text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
+                {homeWhy.pillars.manufacturing.label}
+              </h3>
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                {homeWhy.pillars.manufacturing.body}
+              </p>
+              <ul class="mt-6 flex flex-wrap gap-2">
+                {homeCapabilities.map((capability) => (
+                  <li class="chip">{capability}</li>
+                ))}
+              </ul>
+              <a
+                href={homeSections.manufacturing.cta.href}
+                class="btn-outline mt-7"
+              >
+                {homeSections.manufacturing.cta.label}
+              </a>
+            </div>
+          </div>
+
+          <!-- Row 2 — quality checks -->
+          <div class="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <h3 class="font-display text-2xl font-bold leading-tight text-gray-900 md:text-3xl">
+                {homeWhy.pillars.quality.label}
+              </h3>
+              <p class="mt-4 text-lg leading-relaxed text-gray-600">
+                {homeWhy.pillars.quality.body}
+              </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3" data-animate>
+              {
+                homeInspectionImages.map((image) => (
+                  <div class="overflow-hidden rounded-card bg-gray-100">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      loading="lazy"
+                      class="aspect-[3/4] w-full object-cover"
+                    />
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+
+          <!-- Row 2b — batch quality record: three gates, six tests, filmed
+               before shipping. Static markup, no client script needed. -->
+          <div class="border border-gray-200 bg-gray-50 p-6 md:p-8" data-animate>
+            <div class="flex flex-wrap items-end justify-between gap-4">
+              <p class="eyebrow">{homeQuality.eyebrow}</p>
+              <p class="text-xs font-semibold tracking-wider text-gray-600 uppercase">
+                {homeQuality.compliance}
+              </p>
+            </div>
+            <p class="mt-2 max-w-3xl text-sm leading-relaxed text-gray-600">
+              {homeQuality.intro}
+            </p>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-3">
+              {
+                homeQuality.gates.map((gate) => (
+                  <div class="border-t-2 border-primary-600 bg-white p-4">
+                    <p class="text-xs font-bold tracking-wider text-primary-600 uppercase">
+                      {gate.stage}
+                    </p>
+                    <h4 class="mt-2 text-base font-semibold text-gray-900">
+                      {gate.title}
+                    </h4>
+                    <p class="mt-2 text-sm leading-relaxed text-gray-600">
+                      {gate.body}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
+
+            <ul class="mt-6 grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
+              {
+                homeQuality.tests.map((test) => (
+                  <li class="border-l border-gray-200 pl-3">
+                    <span class="block text-sm font-semibold text-gray-900">
+                      {test.name}
+                    </span>
+                    <span class="block text-xs leading-relaxed text-gray-500">
+                      {test.method}
+                    </span>
+                  </li>
+                ))
+              }
+            </ul>
+
+            <!-- Placeholder tiles: swap each inner div for an <iframe> (same
+                 embed pattern as the factory tour above) once the YouTube IDs
+                 for the load / drop / assembly videos exist -->
+            <div class="mt-6 grid gap-3 sm:grid-cols-3">
+              {
+                homeQuality.videos.map((video) => (
+                  <div class="flex aspect-video flex-col items-center justify-center gap-1.5 rounded-xs border border-dashed border-gray-300 bg-white text-center">
+                    <Play className="h-6 w-6 text-primary-600" aria-hidden="true" />
+                    <span class="text-sm font-medium text-gray-700">
+                      {video.label}
+                    </span>
+                    <span class="text-xs text-gray-400">Video coming soon</span>
+                  </div>
+                ))
+              }
+            </div>
+
+            <div class="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 pt-4">
+              <p class="text-xs leading-relaxed text-gray-500">
+                {homeQuality.reportNote}
+              </p>
+              <p class="text-xs font-medium text-gray-600">
+                Reviewed by {site.persona.name}, {site.persona.title}
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 — Process rail, then the factory tour in the same block -->
+    <section class="section bg-gray-50" id="process">
+      <ProcessSteps
+        client:visible
+        title={homeSections.process.title}
+        subtitle={homeSections.process.subtitle}
+        action={homeSections.process.cta}
+      />
+
+      <div class="container-page mt-16 lg:mt-24">
+        <div class="grid items-center gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
+          <div
+            class="relative aspect-video overflow-hidden rounded-xs bg-gray-100"
+            data-animate
+          >
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${homeVideo.youtubeId}?rel=0`}
+              title={homeVideo.youtubeTitle}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              class="absolute inset-0 h-full w-full"
+            ></iframe>
+          </div>
+
+          <div data-animate data-delay="60">
+            <h3 class="font-display text-2xl font-bold text-gray-900">
+              {homeSections.video.title}
+            </h3>
+            <p class="mt-3 leading-relaxed text-gray-600">
+              {homeSections.video.subtitle}
+            </p>
+
+            <div class="mt-6 flex flex-wrap gap-4">
+              <a
+                href={homeVideo.watchUrl}
+                class="btn-primary"
+                target="_blank"
+                rel="noopener"
+              >
+                Watch on YouTube
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              </a>
+              <a href={homeSections.video.cta.href} class="btn-outline">
+                {homeSections.video.cta.label}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 09 — Customer programmes -->
+    <CaseStudies
+      title={homeSections.cases.title}
+      subtitle={homeSections.cases.subtitle}
+      showResults
+      action={homeSections.cases.cta}
+    />
+
+    <!-- 10 — Buyer feedback -->
+    <Testimonials
+      client:visible
+      title={homeSections.testimonials.title}
+      subtitle={homeSections.testimonials.subtitle}
+    />
+
+    <!-- 11 — Full FAQ: native <details>, so every answer ships in the HTML -->
+    <FaqAccordion
+      items={homeFaq}
+      title={homeFaqTitle}
+      subtitle={homeFaqSubtitle}
+      action={homeFaqCta}
+    />
+
+    <!-- 12 — Industry insights -->
+    <LatestNews
+      align="center"
+      title={homeSections.insights.title}
+      subtitle={homeSections.insights.subtitle}
+      action={homeSections.insights.cta}
+    />
+
+    <!-- 13 — Final CTA: contained brand-blue card with the two closing actions -->
+    <FinalCTA
+      title={homeCta.title}
+      description={homeCta.description}
+      bullets={homeCta.bullets}
+      footnote={homeCta.footnote}
+      primary={homeCta.primary}
+      secondary={homeCta.secondary}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

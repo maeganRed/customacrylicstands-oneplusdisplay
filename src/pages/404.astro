@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+---
+
+<BaseLayout
+  title="Page Not Found"
+  description="The page you are looking for does not exist. Look through the POP retail display builds or get a quote from our sales team."
+  noindex
+>
+  <Header client:load />
+
+  <main class="flex flex-grow items-center py-24">
+    <div class="container-page text-center">
+      <p class="mb-4 text-sm font-bold uppercase tracking-widest text-primary-600">
+        Error 404
+      </p>
+      <h1 class="mb-6 text-4xl font-bold text-gray-900 md:text-5xl">
+        This page took a wrong turn
+      </h1>
+      <p class="mx-auto mb-10 max-w-xl text-lg text-gray-600">
+        The page you are looking for has moved or never existed. Start from the
+        display builds, or send us your brief for a quote.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="/" class="btn-primary">Back to Home</a>
+        <a href="/pop-retail-displays/" class="btn-outline">See Display Builds</a>
+        <a href="/contact/" class="btn-outline">Request a Quote</a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

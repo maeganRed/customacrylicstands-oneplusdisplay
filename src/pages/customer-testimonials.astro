@@ -1,0 +1,38 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.tsx";
+import Footer from "../components/Footer.tsx";
+import PageHeader from "../components/PageHeader.tsx";
+import Testimonials from "../components/Testimonials.tsx";
+import FinalCTA from "../components/FinalCTA.tsx";
+import { testimonials, testimonialsPage } from "../data/testimonials";
+---
+
+<BaseLayout
+  title={testimonialsPage.title}
+  description={testimonialsPage.description}
+>
+  <Header client:load />
+
+  <main class="flex-grow">
+    <!-- About Us subpage: full feedback list, signed by the named contact -->
+    <PageHeader
+      title={testimonialsPage.title}
+      subtitle={testimonialsPage.subtitle}
+      breadcrumbs={[
+        { label: "About Us", href: "/about-us/" },
+        { label: "Customer Testimonials" },
+      ]}
+    />
+
+    <Testimonials
+      client:visible
+      items={testimonials}
+      title={testimonialsPage.sectionTitle}
+    />
+
+    <FinalCTA />
+  </main>
+
+  <Footer />
+</BaseLayout>

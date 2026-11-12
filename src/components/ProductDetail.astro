@@ -1,0 +1,377 @@
+---
+import {
+  ArrowRight,
+  Check,
+  Mail,
+  MessageCircle,
+  Star,
+} from "lucide-react";
+import Breadcrumbs from "./Breadcrumbs.tsx";
+import ProductGallery from "./ProductGallery.tsx";
+import ProductTabs from "./ProductTabs.tsx";
+import ProductCard from "./ProductCard.tsx";
+import SectionHeader from "./SectionHeader.tsx";
+import FaqAccordion from "./FaqAccordion.tsx";
+import FinalCTA from "./FinalCTA.tsx";
+import { relatedProducts } from "../data/products";
+import { categoryBySlug } from "../data/categories";
+import {
+  artworkGuidelines,
+  productCta,
+  productFaqsFor,
+  productOrderTerms,
+  productQuickContact,
+  productSpecNote,
+  productTabs,
+  whyChooseUs,
+} from "../data/productPage";
+import { inquiryForm } from "../data/inquiry";
+import { orderSteps } from "../data/orderProcess";
+import { categoryHref } from "../data/routes";
+import { site } from "../data/site";
+import type { Product, SpecRow } from "../types";
+
+/** Cards in the same row appear 60ms apart */
+const STAGGER = 60;
+
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+const related = relatedProducts(product.slug);
+const category = categoryBySlug(product.categorySlug);
+const breadcrumbs = [
+  { label: "Home", href: "/" },
+  { label: "POP Retail Displays", href: "/pop-retail-displays/" },
+  {
+    label: product.categoryName,
+    href: category ? categoryHref(category) : undefined,
+  },
+  { label: product.name },
+];
+
+/**
+ * Specification lines are plain text: "Label: Value". Split on the first colon
+ * so a value may still contain one; a line without a colon keeps its label.
+ */
+const parseSpec = (line: string): SpecRow => {
+  const at = line.indexOf(":");
+  return at === -1
+    ? { label: line.trim(), value: "" }
+    : { label: line.slice(0, at).trim(), value: line.slice(at + 1).trim() };
+};
+
+const specs = product.specs.map(parseSpec);
+
+/** Seven questions written from this product's title, used by the page and the schema */
+const faqs = productFaqsFor(product);
+
+/** Absolute URLs, required by the Product structured data */
+const absolute = (path: string) => new URL(path, site.url).href;
+
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((image) => absolute(image.src)),
+    url: absolute(Astro.url.pathname),
+    brand: { "@type": "Brand", name: site.name },
+    category: product.categoryName,
+    material: specs.find((row) => row.label === "Material")?.value,
+    additionalProperty: specs.map((row) => ({
+      "@type": "PropertyValue",
+      name: row.label,
+      value: row.value,
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  },
+];
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+<main class="flex-grow">
+  <!-- Breadcrumb strip -->
+  <div class="border-b border-gray-100 bg-white">
+    <div class="container-page py-2.5">
+      <Breadcrumbs items={breadcrumbs} />
+    </div>
+  </div>
+
+  <!--
+    01 — Gallery, title, description and inquiry form in one viewport.
+    Three grid children on purpose: the quick-contact stack is placed back
+    into the gallery column on desktop (row 2), while the phone layout keeps
+    the original order — gallery, title, form, then the stack.
+  -->
+  <section class="container-page grid gap-6 py-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-x-12 lg:gap-y-6 lg:py-8">
+    <div class="min-w-0 lg:col-start-1 lg:row-start-1">
+      <ProductGallery images={product.images} label={product.name} client:visible />
+    </div>
+
+    <div class="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+      <p class="eyebrow text-primary-600">{product.categoryName}</p>
+      <h1 class="mt-2 text-xl font-bold leading-snug text-gray-900 sm:text-2xl lg:text-[1.75rem]">
+        {product.name}
+      </h1>
+      <p class="mt-3 text-sm leading-relaxed text-gray-600">{product.description}</p>
+
+      <div class="mt-5 border border-gray-200 bg-gray-50 p-4 sm:p-5">
+        <h2 class="text-base font-semibold text-gray-900">{inquiryForm.title}</h2>
+        <p class="mt-1 text-xs leading-relaxed text-gray-600">{inquiryForm.note}</p>
+
+        <form
+          action={`mailto:${site.contact.email}`}
+          method="post"
+          enctype="text/plain"
+          class="mt-4 space-y-3"
+        >
+          <input type="hidden" name="product" value={product.name} />
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label class="form-label" for="quote-name">
+                Name <span class="text-primary-600">*</span>
+              </label>
+              <input
+                class="form-input"
+                id="quote-name"
+                name="name"
+                type="text"
+                autocomplete="name"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="quote-company">Company</label>
+              <input
+                class="form-input"
+                id="quote-company"
+                name="company"
+                type="text"
+                autocomplete="organization"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="quote-email">
+                Email <span class="text-primary-600">*</span>
+              </label>
+              <input
+                class="form-input"
+                id="quote-email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+              />
+            </div>
+            <div>
+              <label class="form-label" for="quote-phone">Phone &amp; WhatsApp</label>
+              <input
+                class="form-input"
+                id="quote-phone"
+                name="phone"
+                type="tel"
+                autocomplete="tel"
+              />
+            </div>
+            <div>
+              <label class="form-label" for="quote-quantity">Estimated quantity</label>
+              <input
+                class="form-input"
+                id="quote-quantity"
+                name="quantity"
+                type="text"
+                placeholder={inquiryForm.qtyHint}
+              />
+            </div>
+            <div>
+              <label class="form-label" for="quote-country">
+                Destination country / port <span class="text-primary-600">*</span>
+              </label>
+              <input
+                class="form-input"
+                id="quote-country"
+                name="country"
+                type="text"
+                placeholder={inquiryForm.countryHint}
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="form-label" for="quote-requirements">
+              Requirements <span class="text-primary-600">*</span>
+            </label>
+            <textarea
+              class="form-textarea"
+              id="quote-requirements"
+              name="requirements"
+              rows="3"
+              placeholder={inquiryForm.requirementsHint}
+              required></textarea>
+          </div>
+
+          <div>
+            <label class="form-label" for="quote-files">
+              {inquiryForm.uploadLabel}
+              <span class="font-normal text-gray-400">({inquiryForm.uploadNote})</span>
+            </label>
+            <input
+              class="form-input file:mr-3 file:rounded-xs file:border-0 file:bg-gray-100 file:px-3 file:py-1.5 file:text-sm file:font-medium"
+              id="quote-files"
+              name="files"
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.ai,.psd,.dwg,.dxf,.step,.stp"
+            />
+          </div>
+
+          <button type="submit" class="btn-primary w-full">{inquiryForm.submit}</button>
+
+          <p class="text-[11px] leading-snug text-gray-500">{inquiryForm.privacy}</p>
+          <p class="text-[11px] leading-snug text-gray-500">
+            {inquiryForm.directLabel}
+            <a class="font-medium underline hover:text-primary-600" href={`mailto:${site.contact.email}`}>
+              {site.contact.email}
+            </a>
+            ·
+            <a
+              class="font-medium underline hover:text-primary-600"
+              href={site.contact.whatsappHref}
+              target="_blank"
+              rel="noopener"
+            >WhatsApp</a>
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Quick contact under the photos: quote shortcut, references, direct channels -->
+    <div class="min-w-0 space-y-3 lg:col-start-1 lg:row-start-2">
+      <a
+        class="btn-primary animate-quote-glow min-h-14 w-full px-6 text-lg"
+        href={productQuickContact.quote.href}
+        data-inquiry-open
+        data-inquiry-product={product.name}
+        aria-haspopup="dialog"
+      >
+        {productQuickContact.quote.label}
+      </a>
+
+      <div class="flex items-center justify-center gap-1" aria-hidden="true">
+        {Array.from({ length: productQuickContact.stars }).map((_, index) => (
+          <Star key={index} className="h-4 w-4 fill-amber-400 text-amber-400" />
+        ))}
+      </div>
+
+      <div class="text-center">
+        <a
+          class="inline-flex items-center justify-center gap-1 text-sm font-semibold text-primary-600 hover:text-primary-700 hover:underline"
+          href={productQuickContact.referrals.href}
+        >
+          {productQuickContact.referrals.label}
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </a>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <a class="btn-outline px-4 text-sm" href={`mailto:${productQuickContact.help.email}`}>
+          <Mail className="h-4 w-4" aria-hidden="true" />
+          {productQuickContact.emailLabel}
+        </a>
+        <a
+          class="btn-outline px-4 text-sm"
+          href={site.contact.whatsappHref}
+          target="_blank"
+          rel="noopener"
+        >
+          <MessageCircle className="h-4 w-4" aria-hidden="true" />
+          {productQuickContact.whatsappLabel}
+        </a>
+      </div>
+
+      <ul class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-600">
+        {productQuickContact.points.map((point) => (
+          <li class="flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5 shrink-0 text-primary-600" aria-hidden="true" />
+            {point}
+          </li>
+        ))}
+      </ul>
+
+      <p class="border border-gray-200 bg-gray-50 p-3 text-xs leading-relaxed text-gray-600">
+        {productQuickContact.help.before}
+        <a
+          class="font-medium text-primary-600 underline hover:text-primary-700"
+          href={`mailto:${productQuickContact.help.email}`}
+        >
+          {productQuickContact.help.email}
+        </a>
+        {productQuickContact.help.after}
+      </p>
+    </div>
+  </section>
+
+  <script>
+    import { initTelInputs } from "../scripts/tel-input";
+
+    initTelInputs();
+  </script>
+
+  <!-- 02 — Product Details (Overview first) / Artwork Guidelines / Order Process / Why Choose -->
+  <ProductTabs
+    client:idle
+    tabs={productTabs}
+    overview={product.overview}
+    specs={specs}
+    note={productSpecNote}
+    artwork={artworkGuidelines}
+    whyChoose={whyChooseUs}
+    steps={orderSteps}
+    terms={productOrderTerms}
+  />
+
+  <!-- 03 — Seven questions written from this product's title -->
+  <FaqAccordion
+    eyebrow="FAQ"
+    title="Questions About This Display"
+    subtitle="Seven questions on customizing this build, sampling it, printing your brand on it and shipping it to your market."
+    items={faqs}
+  />
+
+  <!-- 04 — Related models -->
+  {
+    related.length > 0 && (
+      <section class="section bg-gray-50">
+        <div class="container-page">
+          <SectionHeader
+            title="Related models"
+            subtitle="Other builds from the same category, plus models buyers often compare."
+            align="center"
+            action={{ label: "View all models", href: "/pop-retail-displays/" }}
+          />
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {related.map((item, index) => (
+              <ProductCard product={item} revealDelay={(index % 3) * STAGGER} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 05 — Inquiry CTA -->
+  <FinalCTA title={productCta.title} description={productCta.description} />
+</main>
